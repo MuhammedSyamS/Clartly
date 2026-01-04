@@ -6,6 +6,7 @@ import CategoryBar from "./components/CategoryBar";
 
 export default function App() {
   const [activeCategory, setActiveCategory] = useState("All");
+  const [wishlist, setWishlist] = useState([]);
 
   const products = [
     { id: 1, name: "Wireless Headphones", price: 2999, category: "Headphones" },
@@ -19,30 +20,29 @@ export default function App() {
       ? products
       : products.filter((p) => p.category === activeCategory);
 
+  // ✅ Toggle wishlist logic
+  const toggleWishlist = (product) => {
+    setWishlist((prev) =>
+      prev.some((item) => item.id === product.id)
+        ? prev.filter((item) => item.id !== product.id)
+        : [...prev, product]
+    );
+  };
+
   return (
     <div className="bg-slate-50 min-h-screen">
-      <Navbar />
+      <Navbar wishlistCount={wishlist.length} />
 
-      {/* Hero */}
-      <section className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white">
-        <div className="max-w-7xl mx-auto px-6 py-28 text-center">
-          <h1 className="text-5xl font-extrabold mb-6">
-            Shop Smarter with Cartly
-          </h1>
-          <p className="text-lg opacity-90 max-w-xl mx-auto">
-            Premium gadgets, clean UI, fast checkout.
-          </p>
-        </div>
-      </section>
-
-      {/* Categories */}
       <CategoryBar
         active={activeCategory}
         setActive={setActiveCategory}
       />
 
-      {/* Products */}
-      <ProductGrid products={filteredProducts} />
+      <ProductGrid
+        products={filteredProducts}
+        wishlist={wishlist}
+        toggleWishlist={toggleWishlist}
+      />
 
       <Footer />
     </div>
