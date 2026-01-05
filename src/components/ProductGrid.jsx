@@ -1,5 +1,6 @@
 import { Heart } from "lucide-react";
 
+
 export default function ProductGrid({ products, wishlist, toggleWishlist }) {
   return (
     <section className="max-w-7xl mx-auto px-6 py-16">
@@ -37,6 +38,7 @@ export default function ProductGrid({ products, wishlist, toggleWishlist }) {
                 alt={p.name}
                 className="h-32 w-full object-cover rounded-xl mb-4"
               />
+             
 
               <h4 className="font-semibold">{p.name}</h4>
               <p className="text-indigo-600 font-bold">₹{p.price}</p>

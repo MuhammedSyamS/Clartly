@@ -3,17 +3,13 @@ import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
 import ProductGrid from "./components/ProductGrid";
 import CategoryBar from "./components/CategoryBar";
+import { products } from "./components/Products"
 
 export default function App() {
   const [activeCategory, setActiveCategory] = useState("All");
   const [wishlist, setWishlist] = useState([]);
 
-  const products = [
-    { id: 1, name: "Wireless Headphones", price: 2999, category: "Headphones" , image: "/images/images.jpg" },
-    { id: 2, name: "Smart Watch", price: 4999, category: "Watches" },
-    { id: 3, name: "Gaming Mouse", price: 1999, category: "Gaming" },
-    { id: 4, name: "Bluetooth Speaker", price: 2599, category: "Speakers" }
-  ];
+
 
   const filteredProducts =
     activeCategory === "All"
