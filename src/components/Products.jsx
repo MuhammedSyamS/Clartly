@@ -37,7 +37,7 @@
         name: "Mobile Phone",
         price: 15000,
         category: "Accessories",
-        image: "/products/Phone1.png"
+        image: "/products/Nothing Phone.webp"
     }
 
   ];
