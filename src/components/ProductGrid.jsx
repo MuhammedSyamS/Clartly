@@ -9,9 +9,7 @@ export default function ProductGrid({ products, wishlist, toggleWishlist }) {
 
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
         {products.map((p) => {
-          const isWishlisted = wishlist.some(
-            (item) => item.id === p.id
-          );
+          const isWishlisted = wishlist.some((item) => item.id === p.id);
 
           return (
             <div
@@ -33,12 +31,15 @@ export default function ProductGrid({ products, wishlist, toggleWishlist }) {
                 />
               </button>
 
-              <div className="h-32 bg-gray-100 mb-4 rounded-xl"></div>
+              {/* 🔥 Image */}
+              <img
+                src={p.image}
+                alt={p.name}
+                className="h-32 w-full object-cover rounded-xl mb-4"
+              />
 
               <h4 className="font-semibold">{p.name}</h4>
-              <p className="text-indigo-600 font-bold">
-                ₹{p.price}
-              </p>
+              <p className="text-indigo-600 font-bold">₹{p.price}</p>
 
               <button className="mt-4 w-full bg-indigo-600 text-white py-2 rounded-xl">
                 Add to Cart

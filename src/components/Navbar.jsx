@@ -1,4 +1,6 @@
 import { Heart, ShoppingCart } from "lucide-react";
+import logo  from "../assets/styles/Cartly.png";
+
 import Container from "./Container";
 
 export default function Navbar({ wishlistCount }) {
@@ -7,10 +9,9 @@ export default function Navbar({ wishlistCount }) {
       <Container className="h-16 flex items-center justify-between">
         
         {/* Logo */}
-        <h1 className="text-2xl font-bold tracking-tight text-indigo-600">
-          Cartly
-        </h1>
-
+        <button> <img src={logo} alt="Logo" className="h-20 w-auto " />
+        </button>
+      
         {/* Navigation */}
         <nav className="flex items-center gap-8 text-sm font-medium">
 
