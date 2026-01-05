@@ -30,6 +30,14 @@
         price: 2599,
         category: "Speakers",
         image: "/products/BluetoothSpeaker.jpg"
+    },
+
+    { 
+        id: 5,
+        name: "Mobile Phone",
+        price: 15000,
+        category: "Accessories",
+        image: "/products/Phone1.png"
     }
 
   ];

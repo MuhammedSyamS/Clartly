@@ -1,4 +1,4 @@
-import { Heart, ShoppingCart } from "lucide-react";
+import { Heart, Search, ShoppingCart } from "lucide-react";
 import logo  from "../assets/styles/Cartly.png";
 
 import Container from "./Container";
@@ -14,7 +14,11 @@ export default function Navbar({ wishlistCount }) {
       
         {/* Navigation */}
         <nav className="flex items-center gap-8 text-sm font-medium">
-
+        
+          <Search size={20}/>
+        
+        
+      
           <button className="hover:text-indigo-600 transition">
             Products
           </button>

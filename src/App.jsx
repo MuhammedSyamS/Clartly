@@ -1,6 +1,7 @@
 import { useState } from "react";
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
+import Hero from "./components/Hero";
 import ProductGrid from "./components/ProductGrid";
 import CategoryBar from "./components/CategoryBar";
 import { products } from "./components/Products"
@@ -28,6 +29,10 @@ export default function App() {
   return (
     <div className="bg-slate-50 min-h-screen">
       <Navbar wishlistCount={wishlist.length} />
+
+     {/* 🔥 HERO SECTION */}
+      <Hero />
+
 
       <CategoryBar
         active={activeCategory}

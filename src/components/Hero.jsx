@@ -1,10 +1,12 @@
 import Container from "./Container";
+import attractionImg from "../assets/styles/Shopping.png";
 
 export default function Hero() {
   return (
-    <section className="bg-gradient-to-br from-indigo-600 to-purple-600 text-white">
-      <Container className="py-32 grid md:grid-cols-2 gap-16 items-center">
+    <section className="relative bg-gradient-to-br from-indigo-600 to-purple-600 text-white overflow-hidden">
+      <Container className="relative z-10 py-32 grid md:grid-cols-2 gap-16 items-center">
         
+        {/* LEFT CONTENT */}
         <div>
           <h1 className="text-5xl font-extrabold leading-tight mb-6">
             Smart Shopping <br /> Starts with Cartly
@@ -25,8 +27,14 @@ export default function Hero() {
           </div>
         </div>
 
-        {/* Visual Placeholder */}
-        <div className="hidden md:block h-96 bg-white/10 rounded-3xl backdrop-blur-sm"></div>
+        {/* RIGHT IMAGE (INSIDE BLUE AREA) */}
+        <div className="hidden md:flex justify-center items-center">
+          <img
+            src={attractionImg}
+            alt="Shopping Illustration"
+            className="max-h-[460px] w-auto object-contain drop-shadow-2xl"
+          />
+        </div>
 
       </Container>
     </section>

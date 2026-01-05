@@ -32,13 +32,17 @@ export default function ProductGrid({ products, wishlist, toggleWishlist }) {
                 />
               </button>
 
-              {/* 🔥 Image */}
-              <img
-                src={p.image}
-                alt={p.name}
-                className="h-32 w-full object-cover rounded-xl mb-4"
-              />
+              
              
+              {/* 🔥 Image */}
+           <div className="w-full h-32 overflow-hidden rounded-xl mb-4">
+           <img
+           src={p.image}
+           alt={p.name}
+           className="w-full h-full object-cover"
+           />
+           </div>
+
 
               <h4 className="font-semibold">{p.name}</h4>
               <p className="text-indigo-600 font-bold">₹{p.price}</p>
@@ -53,3 +57,4 @@ export default function ProductGrid({ products, wishlist, toggleWishlist }) {
     </section>
   );
 }
+
