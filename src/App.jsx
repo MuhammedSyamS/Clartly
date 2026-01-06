@@ -4,6 +4,8 @@ import Footer from "./components/Footer";
 import HomePage from "./pages/Home";
 import Login from "./pages/Login";
 import Signup from "./pages/signup";
+import ProductDetails from "./pages/ProductDetails";
+import Cart from "./pages/cart";
 
 function Layout() {
   return (
@@ -22,6 +24,9 @@ export default function App() {
         <Route index element={<HomePage />} />   {/* "/" */}
         <Route path="login" element={<Login />} /> {/* "/login" */}
         <Route path="signup" element={<Signup />} /> {/* "/Signup" */}
+        <Route path="product/:id" element={<ProductDetails />} />
+        <Route path="cart" element={<Cart />} />
+
       </Route>
     </Routes>
   );
