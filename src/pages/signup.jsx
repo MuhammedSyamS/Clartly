@@ -1,6 +1,7 @@
 import { useState } from "react";
 
-const Login = () => {
+const Signup = () => {
+  const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
@@ -28,8 +29,22 @@ const Login = () => {
         }}
       >
         <h2 style={{ fontSize: "28px", marginBottom: "10px", color: "#4f46e5", textAlign: "center" }}>
-          Login
+          Sign Up
         </h2>
+
+        <input
+          type="text"
+          placeholder="Full Name"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          style={{
+            padding: "12px",
+            borderRadius: "8px",
+            border: "1px solid #ccc",
+            outline: "none",
+            fontSize: "16px",
+          }}
+        />
 
         <input
           type="email"
@@ -75,15 +90,15 @@ const Login = () => {
           onMouseOver={(e) => (e.currentTarget.style.backgroundColor = "#3730a3")}
           onMouseOut={(e) => (e.currentTarget.style.backgroundColor = "#4f46e5")}
         >
-          Login
+          Sign Up
         </button>
 
         <p style={{ fontSize: "14px", textAlign: "center", color: "#555" }}>
-          Don't have an account? <a href="/signup" style={{ color: "#4f46e5" }}>Sign up</a>
+          Already have an account? <a href="/login" style={{ color: "#4f46e5" }}>Login</a>
         </p>
       </form>
     </div>
   );
 };
 
-export default Login;
+export default Signup;

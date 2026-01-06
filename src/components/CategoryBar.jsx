@@ -2,7 +2,8 @@ const categories = [
   "All",
   "Headphones",
   "Watches",
-  "Accessories",
+  "Phones",
+  "Laptops",
   "Speakers",
   "Gaming"
 ];
