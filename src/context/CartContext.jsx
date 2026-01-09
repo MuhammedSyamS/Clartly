@@ -7,22 +7,24 @@ export function CartProvider({ children }) {
 
   const addToCart = (product) => {
     setCart((prev) => {
-      const existing = prev.find((item) => item.id === product.id);
-
+      const existing = prev.find((i) => i.id === product.id);
       if (existing) {
-        return prev.map((item) =>
-          item.id === product.id
-            ? { ...item, quantity: item.quantity + product.quantity }
-            : item
+        return prev.map((i) =>
+          i.id === product.id ? { ...i, quantity: i.quantity + 1 } : i
         );
       }
-
-      return [...prev, { ...product }];
+      return [...prev, { ...product, quantity: 1 }];
     });
   };
 
+  const removeFromCart = (id) => {
+    setCart((prev) => prev.filter((i) => i.id !== id));
+  };
+
+  const clearCart = () => setCart([]);
+
   return (
-    <CartContext.Provider value={{ cart, addToCart }}>
+    <CartContext.Provider value={{ cart, addToCart, removeFromCart, clearCart }}>
       {children}
     </CartContext.Provider>
   );

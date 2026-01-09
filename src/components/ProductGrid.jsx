@@ -1,14 +1,15 @@
-import { Heart, Star, ShoppingCart } from "lucide-react";
+
+import { Heart, Star, Eye } from "lucide-react";
 
 export default function ProductGrid({
   products,
-  wishlist,
+  wishlist = [],
   toggleWishlist,
   addToCart,
-  onSelect, // NEW: click handler for product modal
+  onSelect,
 }) {
   return (
-    <section className="max-w-7xl mx-auto px-6 py-10">
+    <section className="max-w-7xl mx-auto px-6 py-12">
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
         {products.map((p) => {
           const isWishlisted = wishlist.some((item) => item.id === p.id);
@@ -16,54 +17,62 @@ export default function ProductGrid({
           return (
             <div
               key={p.id}
-              className="group bg-white rounded-3xl p-4 shadow-sm hover:shadow-xl transition-all duration-300 relative flex flex-col cursor-pointer"
+              className="group relative bg-white rounded-3xl overflow-hidden border border-slate-200 hover:border-indigo-300 transition-all duration-300 shadow-sm hover:shadow-lg"
             >
-              {/* Wishlist button */}
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  toggleWishlist(p);
-                }}
-                className="absolute top-4 right-4 z-10"
-              >
-                <Heart
-                  size={22}
-                  className={
-                    isWishlisted
-                      ? "fill-red-500 text-red-500"
-                      : "text-gray-400"
-                  }
-                />
-              </button>
-
-              {/* Product image */}
+              {/* Product Image */}
               <div
-                onClick={() => onSelect && onSelect(p)}
-                className="relative w-full h-48 rounded-2xl overflow-hidden bg-slate-100"
+                onClick={() => onSelect?.(p)}
+                className="relative h-52 bg-slate-100 overflow-hidden cursor-pointer"
               >
                 <img
                   src={p.image}
                   alt={p.name}
                   className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                 />
+
+                {/* Hover overlay */}
+                <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition flex items-center justify-center gap-4">
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onSelect?.(p);
+                    }}
+                    className="p-3 rounded-full bg-white hover:scale-110 transition"
+                  >
+                    <Eye size={18} />
+                  </button>
+                </div>
               </div>
 
-              {/* Content */}
-              <div
-                onClick={() => onSelect && onSelect(p)}
-                className="mt-4 space-y-2 flex-1"
+              {/* Wishlist Button */}
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  toggleWishlist?.(p);
+                }}
+                className="absolute top-4 right-4 z-10 p-2 rounded-full bg-white shadow hover:scale-110 transition"
               >
+                <Heart
+                  size={18}
+                  className={
+                    isWishlisted
+                      ? "fill-red-500 text-red-500"
+                      : "text-slate-400"
+                  }
+                />
+              </button>
+
+              {/* Product Info */}
+              <div className="p-5 space-y-3">
                 <h4 className="font-semibold text-slate-800 line-clamp-1">
                   {p.name}
                 </h4>
-                <p className="text-sm text-slate-500 line-clamp-2">
-                  {p.description}
-                </p>
+
                 <div className="flex items-center gap-1">
                   {Array.from({ length: 5 }).map((_, i) => (
                     <Star
                       key={i}
-                      size={16}
+                      size={14}
                       className={
                         i < Math.round(p.rating || 0)
                           ? "fill-yellow-400 text-yellow-400"
@@ -71,10 +80,27 @@ export default function ProductGrid({
                       }
                     />
                   ))}
+                  <span className="text-xs text-slate-500 ml-1">
+                    ({p.rating || 0})
+                  </span>
                 </div>
-                <p className="text-indigo-600 font-bold text-lg mt-1">
-                  ₹{p.price}
+
+                <p className="text-sm text-slate-500 line-clamp-2">
+                  {p.description}
                 </p>
+
+                <div className="flex items-center justify-between pt-2">
+                  <p className="text-lg font-bold text-indigo-600">₹{p.price}</p>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation(); // prevent modal open
+                      addToCart?.(p);
+                    }}
+                    className="text-sm font-medium px-4 py-2 rounded-full bg-indigo-600 text-white hover:bg-indigo-700 transition"
+                  >
+                    Add to cart
+                  </button>
+                </div>
               </div>
             </div>
           );

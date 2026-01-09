@@ -4,43 +4,47 @@ import ProductGrid from "../components/ProductGrid";
 import CategoryBar from "../components/CategoryBar";
 import ProductDetails from "./ProductDetails";
 import { products } from "../components/Products";
+import { useCart } from "../context/CartContext";
 
-export default function HomePage() {
+export default function HomePage({ wishlist, toggleWishlist }) {
   const [activeCategory, setActiveCategory] = useState("All");
-  const [wishlist, setWishlist] = useState([]);
   const [selectedProduct, setSelectedProduct] = useState(null);
   const productRef = useRef(null);
+
+  const { addToCart } = useCart();
 
   const filteredProducts =
     activeCategory === "All"
       ? products
       : products.filter((p) => p.category === activeCategory);
 
-  const toggleWishlist = (product) => {
-    setWishlist((prev) =>
-      prev.some((item) => item.id === product.id)
-        ? prev.filter((item) => item.id !== product.id)
-        : [...prev, product]
-    );
-  };
-
   return (
-    <div className="bg-slate-50 min-h-screen p-4">
+    <>
+      {/* ✅ FULL-WIDTH HERO (NO PADDING, NO BG) */}
       <Hero productRef={productRef} />
 
-      <div ref={productRef}>
-        <CategoryBar active={activeCategory} setActive={setActiveCategory} />
+      {/* ✅ NORMAL PAGE CONTENT */}
+      <div
+        ref={productRef}
+        className="bg-slate-50 min-h-screen px-4 sm:px-6 lg:px-8 py-8"
+      >
+        <CategoryBar
+          active={activeCategory}
+          setActive={setActiveCategory}
+        />
+
         <ProductGrid
           products={filteredProducts}
           wishlist={wishlist}
           toggleWishlist={toggleWishlist}
-          onSelect={setSelectedProduct} // <-- NEW: pass click handler
+          addToCart={addToCart}
+          onSelect={setSelectedProduct}
         />
       </div>
 
-      {/* ProductDetails Modal */}
+      {/* Product Modal */}
       {selectedProduct && (
-        <div className="fixed inset-0 bg-black/50 flex justify-center items-start pt-20 z-50 overflow-auto">
+        <div className="fixed inset-0 bg-black/50 z-50 overflow-auto flex justify-center items-start pt-20">
           <div className="bg-white rounded-3xl shadow-2xl max-w-4xl w-full p-6 relative">
             <button
               onClick={() => setSelectedProduct(null)}
@@ -48,6 +52,7 @@ export default function HomePage() {
             >
               ×
             </button>
+
             <ProductDetails
               product={selectedProduct}
               onClose={() => setSelectedProduct(null)}
@@ -55,6 +60,6 @@ export default function HomePage() {
           </div>
         </div>
       )}
-    </div>
+    </>
   );
 }
