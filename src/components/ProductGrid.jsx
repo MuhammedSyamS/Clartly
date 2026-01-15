@@ -117,7 +117,7 @@ export default function ProductGrid({
                       max-sm:text-xs max-sm:px-3 max-sm:py-1.5
                     "
                   >
-                    Add
+                    Add To Cart
                   </button>
                 </div>
               </div>

@@ -1,33 +1,50 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import Hero from "../components/Hero";
 import ProductGrid from "../components/ProductGrid";
 import CategoryBar from "../components/CategoryBar";
 import ProductDetails from "./ProductDetails";
 import { products } from "../components/Products";
 import { useCart } from "../context/CartContext";
+import { useNavigate } from "react-router-dom";
 
 export default function HomePage({ wishlist, toggleWishlist }) {
   const [activeCategory, setActiveCategory] = useState("All");
   const [selectedProduct, setSelectedProduct] = useState(null);
   const productRef = useRef(null);
+  const [user, setUser] = useState(null);
 
   const { addToCart } = useCart();
+  const navigate = useNavigate();
+
+  // ✅ Check login state
+  useEffect(() => {
+    const storedUser = localStorage.getItem("user");
+    if (!storedUser) {
+      navigate("/login");
+    } else {
+      setUser(JSON.parse(storedUser));
+    }
+  }, [navigate]);
 
   const filteredProducts =
     activeCategory === "All"
       ? products
       : products.filter((p) => p.category === activeCategory);
 
+  if (!user) return null; // optional: show loader while checking login
+
   return (
     <>
-      {/* ✅ FULL-WIDTH HERO (NO PADDING, NO BG) */}
+      {/* ✅ Hero section */}
       <Hero productRef={productRef} />
 
-      {/* ✅ NORMAL PAGE CONTENT */}
+      {/* ✅ Page content */}
       <div
         ref={productRef}
         className="bg-slate-50 min-h-screen px-4 sm:px-6 lg:px-8 py-8"
       >
+        
+
         <CategoryBar
           active={activeCategory}
           setActive={setActiveCategory}
