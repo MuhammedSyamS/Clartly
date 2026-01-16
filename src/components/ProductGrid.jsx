@@ -1,5 +1,6 @@
 import { Heart, Star, Eye } from "lucide-react";
 
+
 export default function ProductGrid({
   products = [],
   wishlist = [],
@@ -42,18 +43,20 @@ export default function ProductGrid({
               </div>
 
               {/* Wishlist */}
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  toggleWishlist?.(p);
-                }}
-                className="absolute top-4 right-4 p-2 bg-white rounded-full shadow"
-              >
-                <Heart
-                  size={18}
-                  className={isWishlisted ? "fill-red-500 text-red-500" : "text-gray-400"}
-                />
-              </button>
+             
+             <button
+  onClick={(e) => {
+    e.stopPropagation();
+    toggleWishlist?.(p); // 🔹 full product object
+  }}
+  className="absolute top-4 right-4 p-2 bg-white rounded-full shadow"
+>
+  <Heart
+    size={18}
+    className={wishlist.some((item) => item._id === p._id) ? "fill-red-500 text-red-500" : "text-gray-400"}
+  />
+</button>
+
 
               {/* Info */}
               <div className="p-5 space-y-3">

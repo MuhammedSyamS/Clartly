@@ -1,8 +1,10 @@
 import { Heart, Trash2, ShoppingCart } from "lucide-react";
 import { useCart } from "../context/CartContext";
+import { useWishlist } from "../context/WishlistContext"; // ✅ use context
 
-export default function WishlistPage({ wishlist, removeFromWishlist }) {
-  const { addToCart } = useCart(); // ✅ get addToCart from context
+export default function WishlistPage() {
+  const { addToCart } = useCart(); 
+  const { wishlist, removeFromWishlist } = useWishlist(); // ✅ get wishlist from context
 
   if (!wishlist || wishlist.length === 0) {
     return (
@@ -27,7 +29,7 @@ export default function WishlistPage({ wishlist, removeFromWishlist }) {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
         {wishlist.map((p) => (
           <div
-            key={p.id}
+            key={p._id} // ✅ use _id
             className="bg-white rounded-2xl shadow-sm hover:shadow-lg border border-slate-200 overflow-hidden transition hover:-translate-y-1"
           >
             {/* Product Image */}
@@ -40,7 +42,7 @@ export default function WishlistPage({ wishlist, removeFromWishlist }) {
 
               {/* Remove from wishlist */}
               <button
-                onClick={() => removeFromWishlist(p.id)}
+                onClick={() => removeFromWishlist(p._id)} // ✅ use _id
                 className="absolute top-4 right-4 p-2 rounded-full bg-white shadow hover:scale-110 transition"
               >
                 <Trash2 size={16} className="text-red-500" />
@@ -64,7 +66,7 @@ export default function WishlistPage({ wishlist, removeFromWishlist }) {
                 </span>
 
                 <button
-                  onClick={() => addToCart(p)}
+                  onClick={() => addToCart(p._id)} // ✅ pass _id to addToCart
                   className="flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-full bg-indigo-600 text-white hover:bg-indigo-700 transition"
                 >
                   <ShoppingCart size={16} />

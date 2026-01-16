@@ -1,44 +1,46 @@
 import { useCart } from "../context/CartContext";
-import {
-  Heart,
-  Search,
-  ShoppingCart,
-  Menu,
-  X,
-  Package,
-  LogOut,
-} from "lucide-react";
+import { useWishlist } from "../context/WishlistContext"; // ✅ import wishlist context
+import { Heart, Search, ShoppingCart, Menu, X, Package, LogOut } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import logo from "../assets/styles/Cartly.png";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
-export default function Navbar({ wishlistCount }) {
+export default function Navbar() {
   const { cart } = useCart() || { cart: [] };
+  const { wishlist } = useWishlist(); // ✅ get wishlist from context
+
   const cartCount = cart.reduce((t, i) => t + i.quantity, 0);
+  const wishlistCount = wishlist.length; // ✅ reactive count
+
   const [menuOpen, setMenuOpen] = useState(false);
   const navigate = useNavigate();
 
-  // Check login status
-  const isLoggedIn = Boolean(localStorage.getItem("token"));
+  const [isLoggedIn, setIsLoggedIn] = useState(Boolean(localStorage.getItem("user")));
 
-  // Logout handler
+  useEffect(() => {
+    const handleStorageChange = () => {
+      setIsLoggedIn(Boolean(localStorage.getItem("user")));
+    };
+
+    window.addEventListener("storage", handleStorageChange);
+    return () => window.removeEventListener("storage", handleStorageChange);
+  }, []);
+
   const handleLogout = () => {
     localStorage.removeItem("token");
     localStorage.removeItem("user");
+    setIsLoggedIn(false);
     navigate("/login");
   };
 
   return (
     <header className="sticky top-0 z-50 bg-white shadow-sm">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* MAIN BAR */}
         <div className="flex h-16 md:h-20 items-center justify-between">
-          {/* LOGO */}
           <Link to="/" className="flex items-center">
             <img src={logo} alt="Cartly" className="h-10 sm:h-12 md:h-14 w-auto" />
           </Link>
 
-          {/* SEARCH (DESKTOP) - only for logged-in users */}
           {isLoggedIn && (
             <div className="hidden md:flex flex-1 mx-8 max-w-xl">
               <div className="relative w-full">
@@ -55,12 +57,9 @@ export default function Navbar({ wishlistCount }) {
             </div>
           )}
 
-          {/* ACTIONS */}
           <div className="flex items-center gap-4 md:gap-6">
-            {/* Only show these if user is logged in */}
             {isLoggedIn && (
               <>
-                {/* ORDERS */}
                 <Link
                   to="/orders"
                   className="flex items-center gap-1 text-gray-700 hover:text-indigo-600 transition"
@@ -69,7 +68,6 @@ export default function Navbar({ wishlistCount }) {
                   <span className="hidden md:inline text-sm font-medium">Orders</span>
                 </Link>
 
-                {/* WISHLIST */}
                 <Link to="/wishlist" className="relative">
                   <Heart className="w-5 h-5 text-gray-700 hover:text-red-500 transition" />
                   {wishlistCount > 0 && (
@@ -79,7 +77,6 @@ export default function Navbar({ wishlistCount }) {
                   )}
                 </Link>
 
-                {/* CART */}
                 <Link to="/cart" className="relative">
                   <ShoppingCart className="w-5 h-5 text-gray-700 hover:text-indigo-600 transition" />
                   {cartCount > 0 && (
@@ -91,7 +88,6 @@ export default function Navbar({ wishlistCount }) {
               </>
             )}
 
-            {/* DESKTOP AUTH */}
             <div className="hidden md:flex items-center gap-4">
               {!isLoggedIn ? (
                 <>
@@ -119,7 +115,6 @@ export default function Navbar({ wishlistCount }) {
               )}
             </div>
 
-            {/* MOBILE MENU BUTTON */}
             <button onClick={() => setMenuOpen(!menuOpen)} className="md:hidden">
               {menuOpen ? <X size={26} /> : <Menu size={26} />}
             </button>
@@ -127,7 +122,6 @@ export default function Navbar({ wishlistCount }) {
         </div>
       </div>
 
-      {/* MOBILE MENU */}
       {menuOpen && (
         <div className="md:hidden bg-white border-t shadow-lg">
           <div className="px-5 py-4 space-y-3">

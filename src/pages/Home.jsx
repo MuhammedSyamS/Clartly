@@ -6,17 +6,18 @@ import ProductDetails from "./ProductDetails";
 import { useCart } from "../context/CartContext";
 import { useNavigate } from "react-router-dom";
 
-export default function HomePage({ wishlist, toggleWishlist }) {
+export default function HomePage() {
   const [activeCategory, setActiveCategory] = useState("All");
   const [selectedProduct, setSelectedProduct] = useState(null);
-  const [products, setProducts] = useState([]); // fetched from backend
+  const [wishlist, setWishlist] = useState([]); // ✅ wishlist state
   const [user, setUser] = useState(null);
+  const [products, setProducts] = useState([]);
   const productRef = useRef(null);
 
   const { addToCart } = useCart();
   const navigate = useNavigate();
 
-  // ✅ Check login state
+  // ✅ Check login
   useEffect(() => {
     const storedUser = localStorage.getItem("user");
     if (!storedUser) {
@@ -26,35 +27,37 @@ export default function HomePage({ wishlist, toggleWishlist }) {
     }
   }, [navigate]);
 
-  // ✅ Fetch products from backend
+  // ✅ Fetch products
   useEffect(() => {
     fetch("http://localhost:5000/api/products")
-      .then((res) => {
-        if (!res.ok) throw new Error("Failed to fetch products");
-        return res.json();
-      })
-      .then((data) => setProducts(data))
-      .catch((err) => console.error("Fetch products error:", err));
+      .then(res => res.json())
+      .then(data => setProducts(data))
+      .catch(err => console.error(err));
   }, []);
 
-  // Filter products by category
+  // ✅ Toggle wishlist
+  const toggleWishlist = (product) => {
+    setWishlist(prev => {
+      if (prev.some(p => p._id === product._id)) {
+        return prev.filter(p => p._id !== product._id); // remove
+      } else {
+        return [...prev, product]; // add
+      }
+    });
+  };
+
   const filteredProducts =
     activeCategory === "All"
       ? products
-      : products.filter((p) => p.category === activeCategory);
+      : products.filter(p => p.category === activeCategory);
 
-  if (!user) return null; // optional: show loader while checking login
+  if (!user) return null;
 
   return (
     <>
-      {/* Hero Section */}
       <Hero productRef={productRef} />
 
-      {/* Page Content */}
-      <div
-        ref={productRef}
-        className="bg-slate-50 min-h-screen px-4 sm:px-6 lg:px-8 py-8"
-      >
+      <div ref={productRef} className="bg-slate-50 min-h-screen px-4 sm:px-6 lg:px-8 py-8">
         <CategoryBar active={activeCategory} setActive={setActiveCategory} />
 
         <ProductGrid
