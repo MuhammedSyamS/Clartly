@@ -1,81 +1,70 @@
 import { Heart, Star, Eye } from "lucide-react";
 
 export default function ProductGrid({
-  products,
+  products = [],
   wishlist = [],
   toggleWishlist,
   addToCart,
   onSelect,
 }) {
   return (
-    <section className="max-w-7xl mx-auto px-6 py-12 max-sm:px-3 max-sm:py-6">
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 max-sm:grid-cols-2 max-sm:gap-4">
+    <section className="max-w-7xl mx-auto px-6 py-12">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
         {products.map((p) => {
-          const isWishlisted = wishlist.some((item) => item.id === p.id);
+          const isWishlisted = wishlist.some(
+            (item) => item._id === p._id
+          );
 
           return (
             <div
-              key={p.id}
-              className="
-                group relative bg-white rounded-3xl overflow-hidden
-                border border-slate-200 hover:border-indigo-300
-                transition-all duration-300 shadow-sm hover:shadow-lg
-                max-sm:rounded-2xl
-              "
+              key={p._id}
+              className="group relative bg-white rounded-3xl overflow-hidden border shadow-sm hover:shadow-lg transition"
             >
-              {/* Product Image */}
+              {/* Image */}
               <div
                 onClick={() => onSelect?.(p)}
-                className="
-                  relative h-52 bg-slate-100 overflow-hidden cursor-pointer
-                  max-sm:h-36
-                "
+                className="relative h-52 bg-gray-100 cursor-pointer"
               >
                 <img
                   src={p.image}
                   alt={p.name}
-                  className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                  className="w-full h-full object-cover group-hover:scale-110 transition"
                 />
 
-                {/* Hover overlay – desktop ONLY */}
-                <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition flex items-center justify-center gap-4 max-sm:hidden">
+                <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition flex items-center justify-center">
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
                       onSelect?.(p);
                     }}
-                    className="p-3 rounded-full bg-white hover:scale-110 transition"
+                    className="p-3 rounded-full bg-white"
                   >
                     <Eye size={18} />
                   </button>
                 </div>
               </div>
 
-              {/* Wishlist Button */}
+              {/* Wishlist */}
               <button
                 onClick={(e) => {
                   e.stopPropagation();
                   toggleWishlist?.(p);
                 }}
-                className="
-                  absolute top-4 right-4 z-10 p-2 rounded-full
-                  bg-white shadow hover:scale-110 transition
-                  max-sm:top-2 max-sm:right-2 max-sm:p-1.5
-                "
+                className="absolute top-4 right-4 p-2 bg-white rounded-full shadow"
               >
                 <Heart
                   size={18}
                   className={
                     isWishlisted
                       ? "fill-red-500 text-red-500"
-                      : "text-slate-400"
+                      : "text-gray-400"
                   }
                 />
               </button>
 
-              {/* Product Info */}
-              <div className="p-5 space-y-3 max-sm:p-3 max-sm:space-y-2">
-                <h4 className="font-semibold text-slate-800 line-clamp-1 max-sm:text-sm">
+              {/* Info */}
+              <div className="p-5 space-y-3">
+                <h4 className="font-semibold text-gray-800 line-clamp-1">
                   {p.name}
                 </h4>
 
@@ -87,35 +76,27 @@ export default function ProductGrid({
                       className={
                         i < Math.round(p.rating || 0)
                           ? "fill-yellow-400 text-yellow-400"
-                          : "text-slate-300"
+                          : "text-gray-300"
                       }
                     />
                   ))}
-                  <span className="text-xs text-slate-500 ml-1 max-sm:text-[10px]">
-                    ({p.rating || 0})
-                  </span>
                 </div>
 
-                {/* Description hidden ONLY on mobile */}
-                <p className="text-sm text-slate-500 line-clamp-2 max-sm:hidden">
+                <p className="text-sm text-gray-500 line-clamp-2">
                   {p.description}
                 </p>
 
-                <div className="flex items-center justify-between pt-2 max-sm:pt-1">
-                  <p className="text-lg font-bold text-indigo-600 max-sm:text-sm">
+                <div className="flex items-center justify-between pt-2">
+                  <p className="text-lg font-bold text-indigo-600">
                     ₹{p.price}
                   </p>
 
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
-                      addToCart?.(p);
+                      addToCart(p._id); // 🔥 FIXED
                     }}
-                    className="
-                      text-sm font-medium px-4 py-2 rounded-full
-                      bg-indigo-600 text-white hover:bg-indigo-700 transition
-                      max-sm:text-xs max-sm:px-3 max-sm:py-1.5
-                    "
+                    className="px-4 py-2 bg-indigo-600 text-white rounded-full hover:bg-indigo-700 transition"
                   >
                     Add To Cart
                   </button>

@@ -2,8 +2,8 @@ import { useState, useRef, useEffect } from "react";
 import Hero from "../components/Hero";
 import ProductGrid from "../components/ProductGrid";
 import CategoryBar from "../components/CategoryBar";
+import { products as staticProducts } from "../components/Products"; // static fallback
 import ProductDetails from "./ProductDetails";
-import { products } from "../components/Products";
 import { useCart } from "../context/CartContext";
 import { useNavigate } from "react-router-dom";
 
@@ -12,6 +12,7 @@ export default function HomePage({ wishlist, toggleWishlist }) {
   const [selectedProduct, setSelectedProduct] = useState(null);
   const productRef = useRef(null);
   const [user, setUser] = useState(null);
+  const [fetchedProducts, setFetchedProducts] = useState([]); // ✅ renamed
 
   const { addToCart } = useCart();
   const navigate = useNavigate();
@@ -26,29 +27,32 @@ export default function HomePage({ wishlist, toggleWishlist }) {
     }
   }, [navigate]);
 
+  // ✅ Fetch products from backend
+  useEffect(() => {
+    fetch("http://localhost:5000/api/products")
+      .then((res) => res.json())
+      .then((data) => setFetchedProducts(data))
+      .catch((err) => console.error("Fetch products error:", err));
+  }, []);
+
+  const allProducts = fetchedProducts.length ? fetchedProducts : staticProducts;
+
   const filteredProducts =
     activeCategory === "All"
-      ? products
-      : products.filter((p) => p.category === activeCategory);
+      ? allProducts
+      : allProducts.filter((p) => p.category === activeCategory);
 
   if (!user) return null; // optional: show loader while checking login
 
   return (
     <>
-      {/* ✅ Hero section */}
       <Hero productRef={productRef} />
 
-      {/* ✅ Page content */}
       <div
         ref={productRef}
         className="bg-slate-50 min-h-screen px-4 sm:px-6 lg:px-8 py-8"
       >
-        
-
-        <CategoryBar
-          active={activeCategory}
-          setActive={setActiveCategory}
-        />
+        <CategoryBar active={activeCategory} setActive={setActiveCategory} />
 
         <ProductGrid
           products={filteredProducts}
@@ -59,7 +63,6 @@ export default function HomePage({ wishlist, toggleWishlist }) {
         />
       </div>
 
-      {/* Product Modal */}
       {selectedProduct && (
         <div className="fixed inset-0 bg-black/50 z-50 overflow-auto flex justify-center items-start pt-20">
           <div className="bg-white rounded-3xl shadow-2xl max-w-4xl w-full p-6 relative">

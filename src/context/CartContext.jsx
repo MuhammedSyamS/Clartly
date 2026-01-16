@@ -1,35 +1,55 @@
-import { createContext, useContext, useState } from "react";
+import { createContext, useContext, useEffect, useState } from "react";
 
 const CartContext = createContext();
 
 export function CartProvider({ children }) {
   const [cart, setCart] = useState([]);
 
-  const addToCart = (product) => {
-    setCart((prev) => {
-      const existing = prev.find((i) => i.id === product.id);
-      if (existing) {
-        return prev.map((i) =>
-          i.id === product.id ? { ...i, quantity: i.quantity + 1 } : i
-        );
-      }
-      return [...prev, { ...product, quantity: 1 }];
-    });
+  const fetchCart = async () => {
+    const token = localStorage.getItem("token"); // if you have auth
+    if (!token) return;
+    try {
+      const res = await fetch("http://localhost:5000/api/cart", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const data = await res.json();
+      setCart(data.items || []);
+    } catch (err) {
+      console.error("Fetch cart error:", err);
+    }
   };
 
-  const removeFromCart = (id) => {
-    setCart((prev) => prev.filter((i) => i.id !== id));
-  };
+  useEffect(() => {
+    fetchCart();
+  }, []);
 
-  const clearCart = () => setCart([]);
+  const addToCart = async (productId) => {
+    const token = localStorage.getItem("token");
+    if (!token) return alert("Login first");
+
+    try {
+      const res = await fetch("http://localhost:5000/api/cart/add", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ productId }),
+      });
+      const data = await res.json();
+      if (!res.ok) alert(data.message || "Failed to add to cart");
+      fetchCart();
+    } catch (err) {
+      console.error(err);
+      alert("Something went wrong");
+    }
+  };
 
   return (
-    <CartContext.Provider value={{ cart, addToCart, removeFromCart, clearCart }}>
+    <CartContext.Provider value={{ cart, addToCart }}>
       {children}
     </CartContext.Provider>
   );
 }
 
-export function useCart() {
-  return useContext(CartContext);
-}
+export const useCart = () => useContext(CartContext);
