@@ -1,86 +1,64 @@
 import { createContext, useContext, useEffect, useState } from "react";
+import { useAuth } from "./AuthContext";
 
 const WishlistContext = createContext();
 
-export function WishlistProvider({ children }) {
+export const WishlistProvider = ({ children }) => {
+  const { token } = useAuth();
   const [wishlist, setWishlist] = useState([]);
-  const [loading, setLoading] = useState(false);
 
-  const getToken = () => {
-    const storedUser = localStorage.getItem("user");
-    if (!storedUser) return null;
-    try {
-      return JSON.parse(storedUser).token;
-    } catch {
-      return null;
-    }
-  };
-
-  // Fetch wishlist from backend
   const fetchWishlist = async () => {
-    const token = getToken();
-    if (!token) return;
-
+    if (!token) return setWishlist([]);
     try {
       const res = await fetch("http://localhost:5000/api/wishlist", {
         headers: { Authorization: `Bearer ${token}` },
       });
+      if (!res.ok) throw new Error("Failed to fetch wishlist");
       const data = await res.json();
-      setWishlist(data.wishlist || []); // full product objects
+      setWishlist(data.wishlist || []);
     } catch (err) {
       console.error("Fetch wishlist error:", err);
+      setWishlist([]);
     }
   };
 
   useEffect(() => {
     fetchWishlist();
-  }, []);
+  }, [token]);
 
-  // Toggle wishlist on backend and update local state
   const toggleWishlist = async (product) => {
-    const token = getToken();
-    if (!token) {
-      alert("Login required to manage wishlist");
-      return;
-    }
-
-    setLoading(true);
+    if (!token) return alert("Login required to manage wishlist");
     try {
       const res = await fetch("http://localhost:5000/api/wishlist/toggle", {
         method: "POST",
-        headers: {
+        headers: { 
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({ productId: product._id }),
       });
-      const data = await res.json();
+      if (!res.ok) {
+        const errData = await res.json();
+        throw new Error(errData.message || "Toggle wishlist failed");
+      }
 
-      // Update wishlist in context using full product objects
-      const exists = wishlist.some((p) => p._id === product._id);
-      setWishlist((prev) =>
-        exists ? prev.filter((p) => p._id !== product._id) : [...prev, product]
-      );
+      setWishlist((prev) => {
+        const exists = prev.some(p => p._id === product._id);
+        return exists ? prev.filter(p => p._id !== product._id) : [...prev, product];
+      });
     } catch (err) {
       console.error("Toggle wishlist error:", err);
-    } finally {
-      setLoading(false);
+      alert(err.message || "Wishlist action failed");
     }
   };
 
   return (
     <WishlistContext.Provider
-      value={{
-        wishlist,
-        toggleWishlist,
-        wishlistCount: wishlist.length,
-        loading,
-        fetchWishlist,
-      }}
+      value={{ wishlist, toggleWishlist, wishlistCount: wishlist.length }}
     >
       {children}
     </WishlistContext.Provider>
   );
-}
+};
 
 export const useWishlist = () => useContext(WishlistContext);

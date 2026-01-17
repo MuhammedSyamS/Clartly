@@ -1,12 +1,15 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
 
 export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+
   const navigate = useNavigate();
+  const { login } = useAuth();
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -27,12 +30,8 @@ export default function Login() {
         return;
       }
 
-      // ✅ Save token inside user object
-      localStorage.setItem(
-        "user",
-        JSON.stringify({ ...data.user, token: data.token })
-      );
-
+      // ✅ login via AuthContext
+      login(data.user, data.token);
       navigate("/"); // redirect to home
     } catch {
       setError("Server error. Try again.");
@@ -48,7 +47,7 @@ export default function Login() {
           Welcome Back
         </h2>
         <p className="text-center text-gray-500 mb-6">
-          Login to access your Cartly account
+          Login to access your account
         </p>
 
         {error && (

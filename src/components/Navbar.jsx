@@ -1,35 +1,24 @@
 import { useCart } from "../context/CartContext";
-import { useWishlist } from "../context/WishlistContext"; // ✅ import wishlist context
+import { useWishlist } from "../context/WishlistContext";
+import { useAuth } from "../context/AuthContext";
 import { Heart, Search, ShoppingCart, Menu, X, Package, LogOut } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import logo from "../assets/styles/Cartly.png";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 
 export default function Navbar() {
   const { cart } = useCart() || { cart: [] };
-  const { wishlist } = useWishlist(); // ✅ get wishlist from context
-
-  const cartCount = cart.reduce((t, i) => t + i.quantity, 0);
-  const wishlistCount = wishlist.length; // ✅ reactive count
-
-  const [menuOpen, setMenuOpen] = useState(false);
+  const { wishlist } = useWishlist() || { wishlist: [] };
+  const { user, logout } = useAuth();
   const navigate = useNavigate();
+  const [menuOpen, setMenuOpen] = useState(false);
 
-  const [isLoggedIn, setIsLoggedIn] = useState(Boolean(localStorage.getItem("user")));
-
-  useEffect(() => {
-    const handleStorageChange = () => {
-      setIsLoggedIn(Boolean(localStorage.getItem("user")));
-    };
-
-    window.addEventListener("storage", handleStorageChange);
-    return () => window.removeEventListener("storage", handleStorageChange);
-  }, []);
+  const isLoggedIn = !!user;
+  const cartCount = cart.reduce((t, i) => t + i.quantity, 0);
+  const wishlistCount = wishlist.length;
 
   const handleLogout = () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("user");
-    setIsLoggedIn(false);
+    logout();
     navigate("/login");
   };
 
@@ -122,6 +111,7 @@ export default function Navbar() {
         </div>
       </div>
 
+      {/* Mobile Menu */}
       {menuOpen && (
         <div className="md:hidden bg-white border-t shadow-lg">
           <div className="px-5 py-4 space-y-3">

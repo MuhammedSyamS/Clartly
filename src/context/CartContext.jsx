@@ -1,74 +1,49 @@
 import { createContext, useContext, useEffect, useState } from "react";
+import { useAuth } from "./AuthContext";
 
 const CartContext = createContext();
 
-export function CartProvider({ children }) {
+export const CartProvider = ({ children }) => {
+  const { token } = useAuth();
   const [cart, setCart] = useState([]);
 
-  // -------------------------------
-  // Get token safely
-  // -------------------------------
-  const getToken = () => {
-    const storedUser = localStorage.getItem("user");
-    if (!storedUser) return null;
-    try {
-      return JSON.parse(storedUser).token;
-    } catch {
-      return null;
-    }
-  };
-
-  // -------------------------------
-  // Fetch cart from backend
-  // -------------------------------
   const fetchCart = async () => {
-    const token = getToken();
-    if (!token) return;
-
+    if (!token) return setCart([]);
     try {
       const res = await fetch("http://localhost:5000/api/cart", {
         headers: { Authorization: `Bearer ${token}` },
       });
-
-      if (!res.ok) throw new Error("Failed to fetch cart");
-
       const data = await res.json();
       setCart(data.items || []);
     } catch (err) {
       console.error("Fetch cart error:", err);
+      setCart([]);
     }
   };
 
   useEffect(() => {
     fetchCart();
-  }, []);
+  }, [token]);
 
-  // -------------------------------
-  // Add to cart
-  // -------------------------------
   const addToCart = async (productId) => {
-    const token = getToken();
-    if (!token) {
-      alert("You must be logged in to add to cart");
-      return;
-    }
-
+    if (!token) return alert("Login required to add to cart");
     try {
       const res = await fetch("http://localhost:5000/api/cart/add", {
         method: "POST",
-        headers: {
+        headers: { 
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({ productId }),
       });
-
-      if (!res.ok) throw new Error("Add to cart failed");
-
-      await fetchCart(); // refresh cart
+      if (!res.ok) {
+        const errData = await res.json();
+        throw new Error(errData.message || "Add to cart failed");
+      }
+      await fetchCart();
     } catch (err) {
       console.error("Add to cart error:", err);
-      alert("Something went wrong");
+      alert(err.message || "Add to cart failed");
     }
   };
 
@@ -77,13 +52,12 @@ export function CartProvider({ children }) {
       value={{
         cart,
         addToCart,
-        cartCount: cart.reduce((sum, item) => sum + item.quantity, 0),
-        fetchCart,
+        cartCount: cart.reduce((total, item) => total + item.quantity, 0),
       }}
     >
       {children}
     </CartContext.Provider>
   );
-}
+};
 
 export const useCart = () => useContext(CartContext);
