@@ -1,10 +1,12 @@
 import { useCart } from "../context/CartContext";
-import { Trash2 } from "lucide-react";
+import { useAuth } from "../context/AuthContext";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 export default function Checkout() {
-  const { cart, removeFromCart, clearCart } = useCart();
+  const { cart, fetchCart } = useCart();
+  const { token } = useAuth();
+  const navigate = useNavigate();
 
   const [formData, setFormData] = useState({
     name: "",
@@ -17,23 +19,23 @@ export default function Checkout() {
     card: "",
   });
 
-  const navigate = useNavigate();
-  const total = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
+  // Total amount using productId.price
+  const total = cart.reduce(
+    (sum, item) => sum + ((item.productId?.price || 0) * item.quantity),
+    0
+  );
 
   const handleChange = (e) =>
     setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
 
   const handleCheckout = async () => {
+    if (!token) return alert("You must be logged in to place an order!");
     if (cart.length === 0) return alert("Your cart is empty!");
     if (!formData.name || !formData.email || !formData.address)
-      return alert("Please fill all required details");
+      return alert("Please fill all required fields!");
 
     try {
-      const token = localStorage.getItem("token");
-      if (!token) return alert("You must be logged in to place an order!");
-
-      // Backend expects cart in DB; we just send optional info
-      const res = await fetch("/api/orders", {
+      const res = await fetch("http://localhost:5000/api/order/place", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -42,7 +44,6 @@ export default function Checkout() {
         body: JSON.stringify({ customer: formData }),
       });
 
-      // ✅ Always check for empty responses
       if (!res.ok) {
         const text = await res.text();
         throw new Error(text || "Failed to place order");
@@ -50,10 +51,10 @@ export default function Checkout() {
 
       const data = await res.json();
 
-      // Clear cart locally
-      clearCart();
+      // Refresh cart after placing order
+      await fetchCart();
 
-      // Navigate to Orders page with newly created order
+      alert("Order placed successfully!");
       navigate("/orders", { state: { order: data.order } });
     } catch (err) {
       console.error(err);
@@ -63,12 +64,10 @@ export default function Checkout() {
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-12">
-      <h1 className="text-4xl font-bold text-slate-800 mb-10">Checkout</h1>
+      <h1 className="text-4xl font-bold mb-10">Checkout</h1>
 
       {cart.length === 0 ? (
-        <p className="text-center text-slate-500 text-lg">
-          Your cart is empty.
-        </p>
+        <p className="text-center text-gray-500">Your cart is empty.</p>
       ) : (
         <div className="flex flex-col lg:flex-row gap-8">
           {/* Billing Form */}
@@ -105,20 +104,17 @@ export default function Checkout() {
 
             <div className="flex-1 space-y-4 overflow-y-auto max-h-[400px]">
               {cart.map((item) => (
-                <div key={item.id} className="flex justify-between border-b pb-2">
+                <div key={item._id} className="flex justify-between border-b pb-2">
                   <div>
-                    <p className="font-semibold">{item.name}</p>
-                    <p className="text-sm text-gray-500">Qty: {item.quantity}</p>
+                    <p className="font-semibold">{item.productId?.name || "Unknown Product"}</p>
+                    <p className="text-sm text-gray-500">
+                      Qty: {item.quantity}
+                    </p>
                   </div>
-
                   <div className="text-right">
-                    <p className="font-bold">₹{item.price * item.quantity}</p>
-                    <button
-                      onClick={() => removeFromCart(item.id)}
-                      className="text-red-500 text-sm"
-                    >
-                      Remove
-                    </button>
+                    <p className="font-bold">
+                      ₹{(item.productId?.price || 0) * item.quantity}
+                    </p>
                   </div>
                 </div>
               ))}

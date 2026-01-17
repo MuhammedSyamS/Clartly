@@ -35,7 +35,7 @@ export default function ProductGrid({ products = [], onSelect }) {
                 <p className="text-sm text-gray-500 line-clamp-2">{p.description}</p>
                 <div className="flex items-center justify-between pt-2">
                   <p className="text-lg font-bold text-indigo-600">₹{p.price}</p>
-                  <button onClick={() => addToCart(p._id)} className="px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700 transition">
+                  <button onClick={() => addToCart(p._id)} className="px-4 py-2 bg-indigo-600 text-white  hover:bg-indigo-700 transition rounded-full">
                     Add To Cart
                   </button>
                 </div>
