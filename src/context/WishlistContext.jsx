@@ -7,6 +7,7 @@ export const WishlistProvider = ({ children }) => {
   const { token } = useAuth();
   const [wishlist, setWishlist] = useState([]);
 
+  // Fetch Wishlist
   const fetchWishlist = async () => {
     if (!token) return setWishlist([]);
     try {
@@ -26,6 +27,9 @@ export const WishlistProvider = ({ children }) => {
     fetchWishlist();
   }, [token]);
 
+  // ------------------------------------------
+  // YOUR EXISTING TOGGLE LOGIC (UNTOUCHED)
+  // ------------------------------------------
   const toggleWishlist = async (product) => {
     if (!token) return alert("Login required to manage wishlist");
     try {
@@ -52,9 +56,41 @@ export const WishlistProvider = ({ children }) => {
     }
   };
 
+  // ------------------------------------------
+  // ✅ NEW: REMOVE FUNCTION (For Trash Button)
+  // ------------------------------------------
+  const removeFromWishlist = async (productId) => {
+    if (!token) return;
+    try {
+      // 1. Optimistic Update (Remove from screen instantly)
+      setWishlist((prev) => prev.filter((p) => p._id !== productId));
+
+      // 2. Call Backend DELETE Endpoint
+      const res = await fetch(`http://localhost:5000/api/wishlist/${productId}`, {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      if (!res.ok) throw new Error("Failed to delete");
+      
+      // 3. Sync with server
+      const data = await res.json();
+      if(data.wishlist) setWishlist(data.wishlist);
+
+    } catch (err) {
+      console.error("Delete wishlist error:", err);
+      fetchWishlist(); // Revert on error
+    }
+  };
+
   return (
     <WishlistContext.Provider
-      value={{ wishlist, toggleWishlist, wishlistCount: wishlist.length }}
+      value={{ 
+        wishlist, 
+        toggleWishlist, 
+        removeFromWishlist, // ✅ Exported here
+        wishlistCount: wishlist.length 
+      }}
     >
       {children}
     </WishlistContext.Provider>

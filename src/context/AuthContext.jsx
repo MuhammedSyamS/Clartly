@@ -3,32 +3,38 @@ import { createContext, useContext, useState, useEffect } from "react";
 const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(null);
-  const [token, setToken] = useState(null);
+  // 1. Initialize State DIRECTLY from LocalStorage (Prevents "flicker" on refresh)
+  const [user, setUser] = useState(() => {
+    const savedUser = localStorage.getItem("user");
+    return savedUser ? JSON.parse(savedUser) : null;
+  });
 
-  useEffect(() => {
-    const stored = localStorage.getItem("user");
-    if (stored) {
-      const parsed = JSON.parse(stored);
-      setUser(parsed);
-      setToken(parsed.token);
-    }
-  }, []);
+  const [token, setToken] = useState(() => {
+    return localStorage.getItem("token") || null;
+  });
 
+  // 2. Helper: Check if current user is Admin
+  const isAdmin = user?.role === "admin";
+
+  // 3. Login Function (Updates state & storage)
   const login = (userData, jwtToken) => {
-    localStorage.setItem("user", JSON.stringify({ ...userData, token: jwtToken }));
-    setUser({ ...userData, token: jwtToken });
+    setUser(userData);
     setToken(jwtToken);
+    localStorage.setItem("user", JSON.stringify(userData));
+    localStorage.setItem("token", jwtToken);
   };
 
+  // 4. Logout Function
   const logout = () => {
-    localStorage.removeItem("user");
     setUser(null);
     setToken(null);
+    localStorage.removeItem("user");
+    localStorage.removeItem("token");
   };
 
   return (
-    <AuthContext.Provider value={{ user, token, login, logout }}>
+    // ✅ Expose 'isAdmin' so you can use it anywhere easily
+    <AuthContext.Provider value={{ user, token, isAdmin, login, logout }}>
       {children}
     </AuthContext.Provider>
   );

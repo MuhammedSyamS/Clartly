@@ -1,7 +1,7 @@
 import { useCart } from "../context/CartContext";
 import { useWishlist } from "../context/WishlistContext";
 import { useAuth } from "../context/AuthContext";
-import { Heart, Search, ShoppingCart, Menu, X, Package, LogOut } from "lucide-react";
+import { Heart, Search, ShoppingCart, Menu, X, Package, LogOut, User } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import logo from "../assets/styles/Cartly.png";
 import { useState } from "react";
@@ -16,6 +16,9 @@ export default function Navbar() {
   const isLoggedIn = !!user;
   const cartCount = cart.reduce((t, i) => t + i.quantity, 0);
   const wishlistCount = wishlist.length;
+
+  // Helper to safely get the name
+  const userName = user?.name || "User";
 
   const handleLogout = () => {
     logout();
@@ -94,13 +97,23 @@ export default function Navbar() {
                   </Link>
                 </>
               ) : (
-                <button
-                  onClick={handleLogout}
-                  className="flex items-center gap-2 px-4 py-2 rounded-full bg-red-500 text-white text-sm font-medium hover:bg-red-600 transition"
-                >
-                  <LogOut className="w-4 h-4" />
-                  Logout
-                </button>
+                <>
+                  {/* ✅ DESKTOP: User Name Display */}
+                  <div className="flex items-center gap-2 text-gray-700 border-r pr-4 mr-1">
+                    <User size={18} className="text-indigo-600" />
+                    <span className="text-sm font-bold truncate max-w-[150px]">
+                      Hi, {userName}
+                    </span>
+                  </div>
+
+                  <button
+                    onClick={handleLogout}
+                    className="flex items-center gap-2 px-4 py-2 rounded-full bg-red-500 text-white text-sm font-medium hover:bg-red-600 transition"
+                  >
+                    <LogOut className="w-4 h-4" />
+                    Logout
+                  </button>
+                </>
               )}
             </div>
 
@@ -133,16 +146,24 @@ export default function Navbar() {
                 </Link>
               </>
             ) : (
-              <button
-                onClick={() => {
-                  handleLogout();
-                  setMenuOpen(false);
-                }}
-                className="w-full flex items-center justify-center gap-2 py-2 rounded-lg bg-red-500 text-white font-medium"
-              >
-                <LogOut className="w-4 h-4" />
-                Logout
-              </button>
+              <>
+                {/* ✅ MOBILE: User Name Display */}
+                <div className="flex items-center justify-center gap-2 py-2 text-indigo-700 font-bold bg-indigo-50 rounded-lg mb-2">
+                   <User size={18} />
+                   <span>Welcome, {userName}</span>
+                </div>
+
+                <button
+                  onClick={() => {
+                    handleLogout();
+                    setMenuOpen(false);
+                  }}
+                  className="w-full flex items-center justify-center gap-2 py-2 rounded-lg bg-red-500 text-white font-medium"
+                >
+                  <LogOut className="w-4 h-4" />
+                  Logout
+                </button>
+              </>
             )}
           </div>
         </div>
