@@ -57,14 +57,14 @@ export default function OrderSuccess() {
         <div className="space-y-3">
           <Link 
             to="/orders" 
-            className="block w-full bg-indigo-600 text-white py-3.5 rounded-xl font-bold hover:bg-indigo-700 transition shadow-lg flex items-center justify-center gap-2"
+            className="block-w-full bg-indigo-600 text-white py-3.5 rounded-xl font-bold hover:bg-indigo-700 transition shadow-lg flex items-center justify-center gap-2"
           >
             <Package size={20} /> Track My Order
           </Link>
           
           <Link 
             to="/" 
-            className="block w-full bg-white text-gray-700 border border-gray-300 py-3.5 rounded-xl font-semibold hover:bg-gray-50 transition flex items-center justify-center gap-2"
+            className="block-w-full bg-white text-gray-700 border border-gray-300 py-3.5 rounded-xl font-semibold hover:bg-gray-50 transition flex items-center justify-center gap-2"
           >
             <Home size={20} /> Continue Shopping
           </Link>

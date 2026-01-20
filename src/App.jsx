@@ -14,11 +14,11 @@ import HomePage from "./pages/Home";
 import WishlistPage from "./pages/wishlist";
 import Cart from "./pages/Cart";
 import Checkout from "./pages/checkout";
-import Orders from "./pages/Orders";
+import Orders from "./pages/MyOrders";
 import Login from "./pages/login";
 import Signup from "./pages/signup";
 import ProductDetails from "./pages/ProductDetails"; 
-import Payment from "./pages/Payment";
+import Payment from "./pages/payment";
 import OrderSuccess from "./pages/OrderSuccess";
 
 // ✅ ADMIN IMPORTS (Based on your file paths)
