@@ -95,7 +95,7 @@ export default function Payment() {
 
     // ⚠️ TEMP CLIENT SIDE PAYMENT (TEST)
     const options = {
-      key: "rzp_test_xxxxxxxx", // 🔴 REPLACE WITH YOUR TEST KEY
+      key: "rzp_test_S6PVlt2JlDWEtz", // 🔴 REPLACE WITH YOUR TEST KEY
       amount: totalAmount * 100,
       currency: "INR",
       name: "Cartly",
