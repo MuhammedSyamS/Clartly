@@ -2,19 +2,30 @@ import { createContext, useContext, useEffect, useState } from "react";
 import { useAuth } from "./AuthContext";
 
 const CartContext = createContext();
+const API_URL = "http://localhost:5000";
 
 export const CartProvider = ({ children }) => {
-  const { token } = useAuth(); // always get the latest token
+  const { token } = useAuth();
   const [cart, setCart] = useState([]);
 
-  // Fetch cart from backend
+  // =====================
+  // FETCH CART
+  // =====================
   const fetchCart = async () => {
-    if (!token) return setCart([]); // clear cart if logged out
+    if (!token) {
+      setCart([]);
+      return;
+    }
+
     try {
-      const res = await fetch("http://localhost:5000/api/cart", {
-        headers: { Authorization: `Bearer ${token}` },
+      const res = await fetch(`${API_URL}/api/cart`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
       });
+
       if (!res.ok) throw new Error("Failed to fetch cart");
+
       const data = await res.json();
       setCart(data.items || []);
     } catch (err) {
@@ -24,17 +35,22 @@ export const CartProvider = ({ children }) => {
   };
 
   useEffect(() => {
-    fetchCart(); // run whenever token changes (login/logout)
+    fetchCart();
   }, [token]);
 
-  // Add item to cart
+  // =====================
+  // ADD TO CART
+  // =====================
   const addToCart = async (productId) => {
-    if (!token) return alert("Login required to add to cart");
+    if (!token) {
+      alert("Login required");
+      return;
+    }
 
     try {
-      const res = await fetch("http://localhost:5000/api/cart/add", {
+      const res = await fetch(`${API_URL}/api/cart/add`, {
         method: "POST",
-        headers: { 
+        headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
@@ -44,50 +60,54 @@ export const CartProvider = ({ children }) => {
       const data = await res.json();
       if (!res.ok) throw new Error(data.message || "Add to cart failed");
 
-      await fetchCart(); // refresh cart after adding
+      fetchCart();
     } catch (err) {
       console.error("Add to cart error:", err);
-      alert(err.message || "Add to cart failed");
+      alert(err.message);
     }
   };
 
-  // Remove item from cart
+  // =====================
+  // REMOVE FROM CART
+  // =====================
   const removeFromCart = async (productId) => {
-    if (!token) return alert("Login required to remove from cart");
+    if (!token) return;
 
     try {
-      const res = await fetch(`http://localhost:5000/api/cart/${productId}`, {
+      const res = await fetch(`${API_URL}/api/cart/${productId}`, {
         method: "DELETE",
-        headers: { Authorization: `Bearer ${token}` },
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
       });
 
       const data = await res.json();
       if (!res.ok) throw new Error(data.message || "Remove failed");
 
-      await fetchCart(); // refresh cart after removing
+      fetchCart();
     } catch (err) {
       console.error("Remove cart error:", err);
-      alert(err.message || "Remove from cart failed");
     }
   };
 
-  // Clear entire cart
+  // =====================
+  // CLEAR CART
+  // =====================
   const clearCart = async () => {
-    if (!token) return alert("Login required to clear cart");
+    if (!token) return;
 
     try {
-      const res = await fetch("http://localhost:5000/api/cart/clear", {
-        method: "POST", // your backend route uses POST
-        headers: { Authorization: `Bearer ${token}` },
+      const res = await fetch(`${API_URL}/api/cart/clear`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
       });
 
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.message || "Clear cart failed");
-
-      setCart([]); // clear local state
+      if (!res.ok) throw new Error("Clear cart failed");
+      setCart([]);
     } catch (err) {
       console.error("Clear cart error:", err);
-      alert(err.message || "Failed to clear cart");
     }
   };
 
@@ -97,9 +117,9 @@ export const CartProvider = ({ children }) => {
         cart,
         addToCart,
         removeFromCart,
-        clearCart, // ✅ added
-        cartCount: cart.reduce((total, item) => total + item.quantity, 0),
+        clearCart,
         fetchCart,
+        cartCount: cart.reduce((sum, i) => sum + i.quantity, 0),
       }}
     >
       {children}

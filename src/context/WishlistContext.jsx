@@ -11,7 +11,7 @@ export const WishlistProvider = ({ children }) => {
   const fetchWishlist = async () => {
     if (!token) return setWishlist([]);
     try {
-      const res = await fetch("http://localhost:5000/api/wishlist", {
+      const res = await fetch("https://verda-foregone-noncruciformly.ngrok-free.dev/api/wishlist", {
         headers: { Authorization: `Bearer ${token}` },
       });
       if (!res.ok) throw new Error("Failed to fetch wishlist");
@@ -33,7 +33,7 @@ export const WishlistProvider = ({ children }) => {
   const toggleWishlist = async (product) => {
     if (!token) return alert("Login required to manage wishlist");
     try {
-      const res = await fetch("http://localhost:5000/api/wishlist/toggle", {
+      const res = await fetch("https://verda-foregone-noncruciformly.ngrok-free.devapi/wishlist/toggle", {
         method: "POST",
         headers: { 
           "Content-Type": "application/json",
@@ -66,7 +66,7 @@ export const WishlistProvider = ({ children }) => {
       setWishlist((prev) => prev.filter((p) => p._id !== productId));
 
       // 2. Call Backend DELETE Endpoint
-      const res = await fetch(`http://localhost:5000/api/wishlist/${productId}`, {
+      const res = await fetch(`https://verda-foregone-noncruciformly.ngrok-free.dev/api/wishlist/${productId}`, {
         method: "DELETE",
         headers: { Authorization: `Bearer ${token}` },
       });

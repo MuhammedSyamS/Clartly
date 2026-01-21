@@ -13,7 +13,7 @@ export default function TrackOrder() {
         const token = localStorage.getItem("token");
 
         const res = await axios.get(
-          `http://localhost:5000/api/orders/${orderId}`,
+          `https://verda-foregone-noncruciformly.ngrok-free.dev/api/orders/${orderId}`,
           {
             headers: {
               Authorization: `Bearer ${token}`,
