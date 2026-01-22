@@ -2,7 +2,7 @@ import { createContext, useContext, useEffect, useState } from "react";
 import { useAuth } from "./AuthContext";
 
 const CartContext = createContext();
-const API_URL = "http://localhost:5000";
+const API_URL = "http://localhost:5000/api";
 
 export const CartProvider = ({ children }) => {
   const { token } = useAuth();
@@ -16,17 +16,22 @@ export const CartProvider = ({ children }) => {
       setCart([]);
       return;
     }
-
     try {
-      const res = await fetch(`${API_URL}/api/cart`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+      const res = await fetch(`${API_URL}/cart`, {
+        headers: { Authorization: `Bearer ${token}` },
       });
 
-      if (!res.ok) throw new Error("Failed to fetch cart");
+      const text = await res.text(); // read raw response
+      let data;
+      try {
+        data = JSON.parse(text); // try parsing JSON
+      } catch {
+        console.error("Fetch cart returned non-JSON:", text);
+        throw new Error("Invalid response from server");
+      }
 
-      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || "Failed to fetch cart");
+
       setCart(data.items || []);
     } catch (err) {
       console.error("Fetch cart error:", err);
@@ -41,29 +46,33 @@ export const CartProvider = ({ children }) => {
   // =====================
   // ADD TO CART
   // =====================
-  const addToCart = async (productId) => {
-    if (!token) {
-      alert("Login required");
-      return;
-    }
-
+  const addToCart = async (productId, quantity = 1) => {
+    if (!token) return alert("Login required");
     try {
-      const res = await fetch(`${API_URL}/api/cart/add`, {
+      const res = await fetch(`${API_URL}/cart/add`, {
         method: "POST",
-        headers: {
+        headers: { 
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
+          Authorization: `Bearer ${token}` 
         },
-        body: JSON.stringify({ productId }),
+        body: JSON.stringify({ productId, quantity }),
       });
 
-      const data = await res.json();
+      const text = await res.text();
+      let data;
+      try {
+        data = JSON.parse(text);
+      } catch {
+        console.error("Add to cart returned non-JSON:", text);
+        throw new Error("Invalid response from server");
+      }
+
       if (!res.ok) throw new Error(data.message || "Add to cart failed");
 
       fetchCart();
     } catch (err) {
-      console.error("Add to cart error:", err);
-      alert(err.message);
+      console.error("Add cart error:", err);
+      alert(err.message || "Add to cart failed");
     }
   };
 
@@ -74,14 +83,20 @@ export const CartProvider = ({ children }) => {
     if (!token) return;
 
     try {
-      const res = await fetch(`${API_URL}/api/cart/${productId}`, {
+      const res = await fetch(`${API_URL}/cart/${productId}`, {
         method: "DELETE",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+        headers: { Authorization: `Bearer ${token}` },
       });
 
-      const data = await res.json();
+      const text = await res.text();
+      let data;
+      try {
+        data = JSON.parse(text);
+      } catch {
+        console.error("Remove cart returned non-JSON:", text);
+        throw new Error("Invalid response from server");
+      }
+
       if (!res.ok) throw new Error(data.message || "Remove failed");
 
       fetchCart();
@@ -97,14 +112,17 @@ export const CartProvider = ({ children }) => {
     if (!token) return;
 
     try {
-      const res = await fetch(`${API_URL}/api/cart/clear`, {
+      const res = await fetch(`${API_URL}/cart/clear`, {
         method: "POST",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+        headers: { Authorization: `Bearer ${token}` },
       });
 
-      if (!res.ok) throw new Error("Clear cart failed");
+      if (!res.ok) {
+        const text = await res.text();
+        console.error("Clear cart returned non-JSON:", text);
+        throw new Error("Clear cart failed");
+      }
+
       setCart([]);
     } catch (err) {
       console.error("Clear cart error:", err);
@@ -119,7 +137,7 @@ export const CartProvider = ({ children }) => {
         removeFromCart,
         clearCart,
         fetchCart,
-        cartCount: cart.reduce((sum, i) => sum + i.quantity, 0),
+        cartCount: cart.reduce((sum, i) => sum + (i.quantity || 1), 0),
       }}
     >
       {children}

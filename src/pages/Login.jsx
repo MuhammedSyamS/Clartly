@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "../context/AuthContext";
 
 export default function Login() {
   const [email, setEmail] = useState("");
@@ -9,7 +8,6 @@ export default function Login() {
   const [loading, setLoading] = useState(false);
 
   const navigate = useNavigate();
-  const { login } = useAuth();
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -17,7 +15,7 @@ export default function Login() {
     setLoading(true);
 
     try {
-      const res = await fetch("https://verda-foregone-noncruciformly.ngrok-free.dev/login", {
+      const res = await fetch("http://localhost:5000/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
@@ -27,28 +25,29 @@ export default function Login() {
 
       if (!res.ok) {
         setError(data.message || "Login failed");
+        setLoading(false);
         return;
       }
 
-      // ✅ login via AuthContext
-      login(data.user, data.token);
+      // Save token in localStorage (or cookies)
+      localStorage.setItem("token", data.token);
+      localStorage.setItem("user", JSON.stringify(data.user));
+
+      setLoading(false);
       navigate("/"); // redirect to home
-    } catch {
+    } catch (err) {
+      console.error(err);
       setError("Server error. Try again.");
-    } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
-      <div className="w-full max-w-md bg-white rounded-3xl shadow-2xl p-10 sm:p-12 lg:p-16">
+    <div className="min-h-screen flex items-center justify-center bg-indigo-50 px-4">
+      <div className="w-full max-w-md bg-white rounded-3xl shadow-2xl p-10">
         <h2 className="text-3xl font-extrabold text-center text-indigo-700 mb-2">
-          Welcome Back
+          Login
         </h2>
-        <p className="text-center text-gray-500 mb-6">
-          Login to access your account
-        </p>
 
         {error && (
           <p className="bg-red-100 text-red-700 px-4 py-2 rounded-lg text-center mb-4">
@@ -61,7 +60,7 @@ export default function Login() {
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            placeholder="Email address"
+            placeholder="Email"
             required
             className="w-full px-5 py-3 rounded-xl border border-gray-300 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 outline-none"
           />
@@ -81,6 +80,16 @@ export default function Login() {
             {loading ? "Logging in..." : "Login"}
           </button>
         </form>
+
+        <p className="text-sm text-center mt-6 text-gray-500">
+          Don't have an account?{" "}
+          <span
+            className="text-indigo-600 font-medium hover:underline cursor-pointer"
+            onClick={() => navigate("/signup")}
+          >
+            Signup
+          </span>
+        </p>
       </div>
     </div>
   );

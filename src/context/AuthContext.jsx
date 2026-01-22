@@ -1,22 +1,24 @@
-import { createContext, useContext, useState, useEffect } from "react";
+import { createContext, useContext, useEffect, useState } from "react";
 
 const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
-  // 1. Initialize State DIRECTLY from LocalStorage (Prevents "flicker" on refresh)
-  const [user, setUser] = useState(() => {
-    const savedUser = localStorage.getItem("user");
-    return savedUser ? JSON.parse(savedUser) : null;
-  });
+  const [user, setUser] = useState(null);
+  const [token, setToken] = useState(null);
+  const [loading, setLoading] = useState(true);
 
-  const [token, setToken] = useState(() => {
-    return localStorage.getItem("token") || null;
-  });
+  // Load user from localStorage
+  useEffect(() => {
+    const storedUser = localStorage.getItem("user");
+    const storedToken = localStorage.getItem("token");
+    if (storedUser && storedToken) {
+      setUser(JSON.parse(storedUser));
+      setToken(storedToken);
+    }
+    setLoading(false);
+  }, []);
 
-  // 2. Helper: Check if current user is Admin
-  const isAdmin = user?.role === "admin";
-
-  // 3. Login Function (Updates state & storage)
+  // Login method
   const login = (userData, jwtToken) => {
     setUser(userData);
     setToken(jwtToken);
@@ -24,7 +26,7 @@ export const AuthProvider = ({ children }) => {
     localStorage.setItem("token", jwtToken);
   };
 
-  // 4. Logout Function
+  // Logout method
   const logout = () => {
     setUser(null);
     setToken(null);
@@ -33,8 +35,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   return (
-    // ✅ Expose 'isAdmin' so you can use it anywhere easily
-    <AuthContext.Provider value={{ user, token, isAdmin, login, logout }}>
+    <AuthContext.Provider value={{ user, token, login, logout, loading }}>
       {children}
     </AuthContext.Provider>
   );

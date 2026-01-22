@@ -1,15 +1,25 @@
-import { useState } from "react";
-
 export default function AdminOrders() {
   const [orders, setOrders] = useState([]);
 
+  useEffect(() => {
+    fetch("/api/admin/orders")
+      .then(res => res.json())
+      .then(data => setOrders(data));
+  }, []);
+
   return (
-    <div className="space-y-6">
-      <h2 className="text-3xl font-bold text-gray-800">Orders Management</h2>
-      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-12 text-center">
-        <p className="text-gray-500 text-lg">Order management interface coming soon.</p>
-        <p className="text-sm text-gray-400 mt-2">Connect to backend /api/orders to see data.</p>
-      </div>
+    <div className="p-6 space-y-6">
+      <h2 className="text-3xl font-bold">Orders</h2>
+      {orders.map(order => (
+        <div key={order._id} className="bg-white p-4 rounded-lg shadow flex justify-between items-center">
+          <div>
+            <p><b>Order ID:</b> {order._id}</p>
+            <p><b>User:</b> {order.user?.name}</p>
+            <p><b>Total:</b> ₹{order.totalAmount}</p>
+          </div>
+          <p className="text-indigo-600">{order.status}</p>
+        </div>
+      ))}
     </div>
   );
 }

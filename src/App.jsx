@@ -7,12 +7,12 @@ import { WishlistProvider } from "./context/WishlistContext";
 // Components
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
-import ChatBot from "./components/Chatbot";
+import ChatBot from "./components/ChatBot";
 
 // User Pages
 import HomePage from "./pages/Home";
 import WishlistPage from "./pages/wishlist";
-import Cart from "./pages/Cart";
+import Cart from "./pages/cart";
 import Checkout from "./pages/checkout";
 import Orders from "./pages/MyOrders";
 import Login from "./pages/login";
@@ -21,11 +21,12 @@ import ProductDetails from "./pages/ProductDetails";
 import Payment from "./pages/payment";
 import OrderSuccess from "./pages/OrderSuccess";
 
-// ✅ ADMIN IMPORTS (Based on your file paths)
+// Admin Pages
 import AdminLayout from "./layouts/AdminLayout"; 
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import AdminProducts from "./pages/admin/AdminProducts";
 import AdminOrders from "./pages/admin/AdminOrders";
+import AdminUsers from "./pages/admin/AdminUsers";
 
 function Layout() {
   return (
@@ -56,11 +57,13 @@ export default function App() {
             <Route path="signup" element={<Signup />} />
           </Route>
 
-          {/* ✅ ADMIN ROUTES */}
-          <Route path="admin" element={<AdminLayout />}>
+          {/* ADMIN ROUTES */}
+          <Route path="admin"  element={ <AdminLayout />  }
+          >
             <Route index element={<AdminDashboard />} />
             <Route path="products" element={<AdminProducts />} />
             <Route path="orders" element={<AdminOrders />} />
+            <Route path="users" element={<AdminUsers />} />
           </Route>
         </Routes>
 

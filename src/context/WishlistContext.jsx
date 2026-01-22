@@ -1,20 +1,26 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import { useAuth } from "./AuthContext";
+import { useCart } from "./CartContext";
 
 const WishlistContext = createContext();
+const API_URL = "http://localhost:5000/api";
 
 export const WishlistProvider = ({ children }) => {
   const { token } = useAuth();
+  const { addToCart } = useCart();
   const [wishlist, setWishlist] = useState([]);
 
-  // Fetch Wishlist
+  // ----------------------------
+  // FETCH WISHLIST
+  // ----------------------------
   const fetchWishlist = async () => {
     if (!token) return setWishlist([]);
     try {
-      const res = await fetch("https://verda-foregone-noncruciformly.ngrok-free.dev/api/wishlist", {
+      const res = await fetch(`${API_URL}/wishlist`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       if (!res.ok) throw new Error("Failed to fetch wishlist");
+
       const data = await res.json();
       setWishlist(data.wishlist || []);
     } catch (err) {
@@ -27,69 +33,79 @@ export const WishlistProvider = ({ children }) => {
     fetchWishlist();
   }, [token]);
 
-  // ------------------------------------------
-  // YOUR EXISTING TOGGLE LOGIC (UNTOUCHED)
-  // ------------------------------------------
+  // ----------------------------
+  // TOGGLE WISHLIST
+  // ----------------------------
   const toggleWishlist = async (product) => {
     if (!token) return alert("Login required to manage wishlist");
+
     try {
-      const res = await fetch("https://verda-foregone-noncruciformly.ngrok-free.devapi/wishlist/toggle", {
+      const res = await fetch(`${API_URL}/wishlist/toggle`, {
         method: "POST",
-        headers: { 
+        headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({ productId: product._id }),
       });
+
       if (!res.ok) {
         const errData = await res.json();
         throw new Error(errData.message || "Toggle wishlist failed");
       }
 
-      setWishlist((prev) => {
-        const exists = prev.some(p => p._id === product._id);
-        return exists ? prev.filter(p => p._id !== product._id) : [...prev, product];
-      });
+      const data = await res.json();
+      setWishlist(data.wishlist || []);
     } catch (err) {
       console.error("Toggle wishlist error:", err);
       alert(err.message || "Wishlist action failed");
+      fetchWishlist(); // revert on error
     }
   };
 
-  // ------------------------------------------
-  // ✅ NEW: REMOVE FUNCTION (For Trash Button)
-  // ------------------------------------------
+  // ----------------------------
+  // REMOVE FROM WISHLIST
+  // ----------------------------
   const removeFromWishlist = async (productId) => {
     if (!token) return;
-    try {
-      // 1. Optimistic Update (Remove from screen instantly)
-      setWishlist((prev) => prev.filter((p) => p._id !== productId));
 
-      // 2. Call Backend DELETE Endpoint
-      const res = await fetch(`https://verda-foregone-noncruciformly.ngrok-free.dev/api/wishlist/${productId}`, {
+    try {
+      const res = await fetch(`${API_URL}/wishlist/${productId}`, {
         method: "DELETE",
         headers: { Authorization: `Bearer ${token}` },
       });
 
-      if (!res.ok) throw new Error("Failed to delete");
-      
-      // 3. Sync with server
-      const data = await res.json();
-      if(data.wishlist) setWishlist(data.wishlist);
+      if (!res.ok) throw new Error("Failed to remove wishlist item");
 
+      const data = await res.json();
+      setWishlist(data.wishlist || []);
     } catch (err) {
-      console.error("Delete wishlist error:", err);
-      fetchWishlist(); // Revert on error
+      console.error("Remove wishlist error:", err);
+      fetchWishlist(); // revert on error
+    }
+  };
+
+  // ----------------------------
+  // MOVE ITEM TO CART
+  // ----------------------------
+  const moveToCart = async (product) => {
+    try {
+      await addToCart(product._id); // Add to cart
+      await removeFromWishlist(product._id); // Remove from wishlist
+    } catch (err) {
+      console.error("Move to cart error:", err);
+      alert("Failed to move item to cart");
     }
   };
 
   return (
     <WishlistContext.Provider
-      value={{ 
-        wishlist, 
-        toggleWishlist, 
-        removeFromWishlist, // ✅ Exported here
-        wishlistCount: wishlist.length 
+      value={{
+        wishlist,
+        wishlistCount: wishlist.length,
+        toggleWishlist,
+        removeFromWishlist,
+        moveToCart,
       }}
     >
       {children}
