@@ -80,6 +80,15 @@ export default function Navbar() {
               </>
             )}
 
+            {isLoggedIn && user?.role === "admin" && (
+              <Link
+                to="/admin"
+                className="px-4 py-2 rounded-full bg-indigo-100 text-indigo-700 text-sm font-bold hover:bg-indigo-200 transition"
+              >
+                Admin Panel
+              </Link>
+            )}
+
             <div className="hidden md:flex items-center gap-4">
               {!isLoggedIn ? (
                 <>
@@ -122,52 +131,54 @@ export default function Navbar() {
             </button>
           </div>
         </div>
-      </div>
+      </div >
 
       {/* Mobile Menu */}
-      {menuOpen && (
-        <div className="md:hidden bg-white border-t shadow-lg">
-          <div className="px-5 py-4 space-y-3">
-            {!isLoggedIn ? (
-              <>
-                <Link
-                  to="/login"
-                  onClick={() => setMenuOpen(false)}
-                  className="block text-center py-2 rounded-lg bg-indigo-600 text-white font-medium"
-                >
-                  Login
-                </Link>
-                <Link
-                  to="/signup"
-                  onClick={() => setMenuOpen(false)}
-                  className="block text-center py-2 rounded-lg bg-gray-200 font-medium"
-                >
-                  Signup
-                </Link>
-              </>
-            ) : (
-              <>
-                {/* ✅ MOBILE: User Name Display */}
-                <div className="flex items-center justify-center gap-2 py-2 text-indigo-700 font-bold bg-indigo-50 rounded-lg mb-2">
-                   <User size={18} />
-                   <span>Welcome, {userName}</span>
-                </div>
+      {
+        menuOpen && (
+          <div className="md:hidden bg-white border-t shadow-lg">
+            <div className="px-5 py-4 space-y-3">
+              {!isLoggedIn ? (
+                <>
+                  <Link
+                    to="/login"
+                    onClick={() => setMenuOpen(false)}
+                    className="block text-center py-2 rounded-lg bg-indigo-600 text-white font-medium"
+                  >
+                    Login
+                  </Link>
+                  <Link
+                    to="/signup"
+                    onClick={() => setMenuOpen(false)}
+                    className="block text-center py-2 rounded-lg bg-gray-200 font-medium"
+                  >
+                    Signup
+                  </Link>
+                </>
+              ) : (
+                <>
+                  {/* ✅ MOBILE: User Name Display */}
+                  <div className="flex items-center justify-center gap-2 py-2 text-indigo-700 font-bold bg-indigo-50 rounded-lg mb-2">
+                    <User size={18} />
+                    <span>Welcome, {userName}</span>
+                  </div>
 
-                <button
-                  onClick={() => {
-                    handleLogout();
-                    setMenuOpen(false);
-                  }}
-                  className="w-full flex items-center justify-center gap-2 py-2 rounded-lg bg-red-500 text-white font-medium"
-                >
-                  <LogOut className="w-4 h-4" />
-                  Logout
-                </button>
-              </>
-            )}
+                  <button
+                    onClick={() => {
+                      handleLogout();
+                      setMenuOpen(false);
+                    }}
+                    className="w-full flex items-center justify-center gap-2 py-2 rounded-lg bg-red-500 text-white font-medium"
+                  >
+                    <LogOut className="w-4 h-4" />
+                    Logout
+                  </button>
+                </>
+              )}
+            </div>
           </div>
-        </div>
-      )}
-    </header>
+        )
+      }
+    </header >
   );
 }

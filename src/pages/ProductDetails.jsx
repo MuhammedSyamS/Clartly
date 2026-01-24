@@ -1,10 +1,13 @@
 import { useState } from "react";
+import { Heart } from "lucide-react";
 import { useCart } from "../context/CartContext";
+import { useWishlist } from "../context/WishlistContext";
 import { useNavigate } from "react-router-dom";
 
 export default function ProductDetails({ product, onClose }) {
   const { addToCart } = useCart();
-  const navigate = useNavigate(); // <-- added
+  const { wishlist, toggleWishlist } = useWishlist();
+  const navigate = useNavigate();
   const [quantity, setQuantity] = useState(1);
   const [reviews, setReviews] = useState([{ rating: 4, text: "Great quality!" }]);
   const [rating, setRating] = useState(0);
@@ -12,6 +15,8 @@ export default function ProductDetails({ product, onClose }) {
   const [reviewText, setReviewText] = useState("");
 
   if (!product) return null;
+
+  const isWishlisted = wishlist.some(w => w._id === product._id);
 
   const submitReview = () => {
     if (!rating || !reviewText.trim()) return;
@@ -21,22 +26,29 @@ export default function ProductDetails({ product, onClose }) {
   };
 
   const handleAddToCart = () => {
-    addToCart({
-      ...product,
-      quantity,
-    });
-    navigate("/cart"); // <-- redirect to cart page
+    if (product.stock < 1) return alert("Product is out of stock!");
+    addToCart(product._id, quantity);
+    navigate("/cart");
   };
 
   return (
     <div className="grid md:grid-cols-2 gap-8">
       {/* Image */}
-      <div className="flex justify-center items-center">
+      <div className="flex justify-center items-center relative">
         <img
           src={product.image}
           alt={product.name}
           className="w-full max-w-[400px] object-contain hover:scale-105 transition"
         />
+        <button
+          onClick={() => toggleWishlist(product)}
+          className="absolute top-4 right-4 p-2 bg-white rounded-full shadow hover:shadow-lg transition"
+        >
+          <Heart
+            size={20}
+            className={isWishlisted ? "fill-red-500 text-red-500" : "text-gray-400"}
+          />
+        </button>
       </div>
 
       {/* Details */}
@@ -44,6 +56,11 @@ export default function ProductDetails({ product, onClose }) {
         <h1 className="text-3xl font-bold">{product.name}</h1>
         <p className="text-gray-600">{product.description}</p>
         <p className="text-2xl font-bold text-indigo-600">₹{product.price}</p>
+
+        <div className={`inline-block px-3 py-1 rounded-full text-sm font-bold ${product.stock > 0 ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
+          }`}>
+          {product.stock > 0 ? `In Stock (${product.stock} left)` : 'Out of Stock'}
+        </div>
 
         {/* Quantity */}
         <div className="flex items-center gap-4">
@@ -68,7 +85,7 @@ export default function ProductDetails({ product, onClose }) {
         {/* Actions */}
         <div className="flex gap-4 mt-4">
           <button
-            onClick={handleAddToCart} // <-- redirect after add
+            onClick={handleAddToCart}
             className="flex-1 bg-indigo-600 text-white py-2 rounded-lg hover:bg-indigo-700 transition"
           >
             Add to Cart
@@ -106,9 +123,8 @@ export default function ProductDetails({ product, onClose }) {
                   onMouseEnter={() => setHoverRating(star)}
                   onMouseLeave={() => setHoverRating(0)}
                   onClick={() => setRating(star)}
-                  className={`text-xl ${
-                    (hoverRating || rating) >= star ? "text-blue-500" : "text-gray-300"
-                  }`}
+                  className={`text-xl ${(hoverRating || rating) >= star ? "text-blue-500" : "text-gray-300"
+                    }`}
                 >
                   ★
                 </button>

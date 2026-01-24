@@ -1,184 +1,167 @@
-import { useEffect, useState } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { useCart } from "../context/CartContext";
-import { useAuth } from "../context/AuthContext";
+import api from "../utils/axios";
+import { useState } from "react";
 
 export default function Payment() {
+  const { cart, fetchCart } = useCart();
   const navigate = useNavigate();
   const location = useLocation();
-  const { cart, fetchCart } = useCart();
-  const { token } = useAuth();
+  const [loadingCOD, setLoadingCOD] = useState(false);
+  const [loadingOnline, setLoadingOnline] = useState(false);
 
   const shippingAddress = location.state?.shippingAddress;
+  if (!shippingAddress) {
+    navigate("/checkout");
+    return null;
+  }
 
-  const [method, setMethod] = useState("cod");
-  const [loading, setLoading] = useState(false);
-
-  // -----------------------------
-  // Redirect if not logged in or no shipping address
-  // -----------------------------
-  useEffect(() => {
-    if (!token) return navigate("/login");
-    if (!shippingAddress) return navigate("/checkout");
-  }, [token, shippingAddress, navigate]);
-
-  if (!shippingAddress || !token) return null;
-
-  // -----------------------------
-  // Prepare cart items safely
-  // -----------------------------
-  const cartItemsToSend = cart.map((i) => ({
-    productId: i._id || i.id,
-    quantity: Number(i.quantity) || 1,
-    price: Number(i.price) || 0,
-  }));
-
-  const totalAmount = cartItemsToSend.reduce(
+  // Total amount
+  const totalAmount = cart.reduce(
     (sum, item) => sum + item.price * item.quantity,
     0
   );
 
-  // -----------------------------
-  // Load Razorpay SDK
-  // -----------------------------
-  const loadRazorpay = () =>
-    new Promise((resolve) => {
-      if (window.Razorpay) return resolve(true);
-
-      const script = document.createElement("script");
-      script.src = "https://checkout.razorpay.com/v1/checkout.js";
-      script.onload = () => resolve(true);
-      script.onerror = () => resolve(false);
-      document.body.appendChild(script);
-    });
-
-  // -----------------------------
-  // Place Order (COD / Razorpay)
-  // -----------------------------
-  const placeOrder = async (paymentMethod, paymentDetails = {}) => {
-    if (!cartItemsToSend.length) return alert("Cart is empty");
-
+  const handleCOD = async () => {
     try {
-      setLoading(true);
+      setLoadingCOD(true);
+      const cartItems = cart.map(item => ({
+        productId: item.id || item._id || item.productId,
+        quantity: item.quantity
+      }));
 
-      const res = await fetch("/api/orders/place", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
+      const res = await api.post(
+        "/payment/cod",
+        {
           shippingAddress,
-          paymentMethod,
-          paymentDetails,
-          cartItems: cartItemsToSend,
-        }),
-      });
+          paymentMethod: "COD",
+          cartItems
+        },
+        { headers: { Authorization: `Bearer ${sessionStorage.getItem("token")}` } }
+      );
+      setLoadingCOD(false);
 
-      const text = await res.text();
-      let data;
-      try {
-        data = JSON.parse(text);
-      } catch {
-        console.error("Non-JSON response:", text);
-        throw new Error("Server returned invalid response");
+      if (res.data.success) {
+        alert("COD order placed successfully!");
+        await fetchCart();
+        navigate("/orders");
       }
-
-      if (!res.ok) {
-        throw new Error(data.message || "Order failed");
-      }
-
-      // Refresh cart
-      await fetchCart();
-
-      // Navigate to success page
-      navigate("/order-success", { state: { order: data.order } });
     } catch (err) {
-      console.error("Place order error:", err);
-      alert(err.message || "Order failed");
-    } finally {
-      setLoading(false);
+      setLoadingCOD(false);
+      console.error("COD Error:", err);
+      alert("COD failed");
     }
   };
 
-  // -----------------------------
-  // Handle Pay Button Click
-  // -----------------------------
-  const handlePay = async () => {
-    if (!cartItemsToSend.length) return alert("Cart is empty");
+  const handleOnline = async () => {
+    try {
+      setLoadingOnline(true);
+      const { data: razorpayData } = await api.post(
+        "/payment/razorpay",
+        { shippingAddress },
+        { headers: { Authorization: `Bearer ${sessionStorage.getItem("token")}` } }
+      );
 
-    setLoading(true);
+      const options = {
+        key: import.meta.env.VITE_RAZORPAY_KEY_ID,
+        amount: razorpayData.amount,
+        currency: "INR",
+        order_id: razorpayData.id,
+        name: "Cartly Shop",
+        description: "Order Payment",
+        handler: async (response) => {
+          try {
+            const verifyRes = await api.post(
+              "/payment/razorpay/verify",
+              {
+                razorpay_order_id: response.razorpay_order_id,
+                razorpay_payment_id: response.razorpay_payment_id,
+                razorpay_signature: response.razorpay_signature,
+              },
+              { headers: { Authorization: `Bearer ${sessionStorage.getItem("token")}` } }
+            );
 
-    if (method === "cod") {
-      await placeOrder("cod");
-      setLoading(false);
-      return;
+            if (verifyRes.data.success) {
+              alert("Payment successful!");
+              await fetchCart();
+              navigate("/orders");
+            } else {
+              alert("Payment verification failed");
+            }
+          } catch (err) {
+            console.error("Payment verify error:", err);
+            alert("Payment verification failed");
+          }
+        },
+        prefill: {
+          name: shippingAddress.name || "",
+          email: shippingAddress.email || "",
+          contact: shippingAddress.phone || "",
+        },
+        theme: { color: "#3399cc" },
+      };
+
+      const rzp = new window.Razorpay(options);
+      rzp.open();
+      setLoadingOnline(false);
+    } catch (err) {
+      setLoadingOnline(false);
+      console.error("Razorpay Error:", err);
+      alert("Online payment failed");
     }
-
-    // Online Payment (Razorpay)
-    const loaded = await loadRazorpay();
-    if (!loaded || !window.Razorpay) {
-      setLoading(false);
-      return alert("Razorpay SDK failed to load");
-    }
-
-    const options = {
-      key: process.env.REACT_APP_RAZORPAY_KEY || "rzp_test_S6PVlt2JlDWEtz",
-      amount: Math.round(totalAmount * 100), // convert to paise
-      currency: "INR",
-      name: "Cartly",
-      description: "Order Payment",
-      handler: (response) => placeOrder("razorpay", response),
-      theme: { color: "#6366f1" },
-    };
-
-    new window.Razorpay(options).open();
   };
 
-  // -----------------------------
-  // Render Payment UI
-  // -----------------------------
   return (
-    <div className="min-h-screen bg-gray-100 flex justify-center items-center p-4">
-      <div className="bg-white p-6 rounded-xl w-full max-w-md space-y-4 shadow-lg">
-        <h2 className="text-xl font-bold">Payment</h2>
+    <div style={styles.container}>
+      <h2 style={styles.heading}>Checkout - Payment</h2>
 
-        <div
-          onClick={() => setMethod("cod")}
-          className={`border p-4 rounded cursor-pointer ${
-            method === "cod" ? "border-indigo-600" : ""
-          }`}
-        >
-          <b>Cash on Delivery</b>
-          <p className="text-sm text-gray-500">Pay after delivery</p>
-        </div>
-
-        <div
-          onClick={() => setMethod("online")}
-          className={`border p-4 rounded cursor-pointer ${
-            method === "online" ? "border-indigo-600" : ""
-          }`}
-        >
-          <b>Pay Online</b>
-          <p className="text-sm text-gray-500">Razorpay (UPI / Card)</p>
-        </div>
-
-        <button
-          disabled={loading}
-          onClick={handlePay}
-          className="w-full bg-indigo-600 text-white py-3 rounded font-bold"
-        >
-          {loading
-            ? "Processing..."
-            : method === "cod"
-            ? "Place Order"
-            : "Pay Now"}
-        </button>
-
-        <p className="text-gray-500 text-sm">
-          Total Amount: ₹{totalAmount.toLocaleString()}
+      <div style={styles.card}>
+        <h3>Shipping Address</h3>
+        <p>{shippingAddress.name}</p>
+        <p>{shippingAddress.address}</p>
+        <p>
+          {shippingAddress.city}, {shippingAddress.state} - {shippingAddress.pinCode}
         </p>
+        <p>{shippingAddress.phone}</p>
+      </div>
+
+      <div style={styles.card}>
+        <h3>Cart Items</h3>
+        {cart.map((item) => (
+          <div key={item._id} style={styles.cartItem}>
+            <span>{item.name} x {item.quantity}</span>
+            <span>₹{item.price * item.quantity}</span>
+          </div>
+        ))}
+        <hr />
+        <div style={styles.cartTotal}>
+          <strong>Total:</strong>
+          <strong>₹{totalAmount}</strong>
+        </div>
+      </div>
+
+      <div style={styles.card}>
+        <h3>Select Payment Method</h3>
+        <button style={styles.button} onClick={handleCOD} disabled={loadingCOD}>
+          {loadingCOD ? "Processing..." : "Cash on Delivery"}
+        </button>
+        <button
+          style={{ ...styles.button, backgroundColor: "#3399cc" }}
+          onClick={handleOnline}
+          disabled={loadingOnline}
+        >
+          {loadingOnline ? "Processing..." : "Pay Online"}
+        </button>
       </div>
     </div>
   );
 }
+
+const styles = {
+  container: { maxWidth: 700, margin: "40px auto", padding: 20, fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif" },
+  heading: { textAlign: "center", marginBottom: 30 },
+  card: { backgroundColor: "#f8f8f8", padding: 20, borderRadius: 10, marginBottom: 20, boxShadow: "0px 2px 10px rgba(0,0,0,0.1)" },
+  cartItem: { display: "flex", justifyContent: "space-between", marginBottom: 8 },
+  cartTotal: { display: "flex", justifyContent: "space-between", fontSize: 16, marginTop: 10 },
+  button: { width: "100%", padding: "12px 0", margin: "10px 0", border: "none", borderRadius: 8, backgroundColor: "#27ae60", color: "#fff", fontSize: 16, cursor: "pointer" },
+};

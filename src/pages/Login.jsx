@@ -1,13 +1,20 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
 
 export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const { login, logout } = useAuth();
 
   const navigate = useNavigate();
+
+  // Clear existing session when visiting login page
+  useEffect(() => {
+    logout();
+  }, []);
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -29,12 +36,16 @@ export default function Login() {
         return;
       }
 
-      // Save token in localStorage (or cookies)
-      localStorage.setItem("token", data.token);
-      localStorage.setItem("user", JSON.stringify(data.user));
+      // Update Auth Context
+      login(data.user, data.token);
 
       setLoading(false);
-      navigate("/"); // redirect to home
+
+      if (data.user.role === "admin") {
+        navigate("/admin");
+      } else {
+        navigate("/");
+      }
     } catch (err) {
       console.error(err);
       setError("Server error. Try again.");

@@ -19,6 +19,7 @@ export default function AdminLayout() {
     { icon: Package, label: "Products", path: "/admin/products" },
     { icon: ShoppingBag, label: "Orders", path: "/admin/orders" },
     { icon: Users, label: "Customers", path: "/admin/users" },
+    { icon: ShoppingBag, label: "Go to Shop", path: "/" },
   ];
 
   return (
@@ -28,19 +29,18 @@ export default function AdminLayout() {
         <div className="p-6 border-b border-gray-100">
           <h1 className="text-2xl font-bold text-indigo-600">Cartly Admin</h1>
         </div>
-        
+
         <nav className="flex-1 p-4 space-y-2">
           {navItems.map((item) => {
-            const isActive = location.pathname === item.path || (item.path !== "/admin" && location.pathname.startsWith(item.path));
+            const isActive = location.pathname === item.path || (item.path !== "/admin" && item.path !== "/" && location.pathname.startsWith(item.path));
             return (
               <Link
                 key={item.path}
                 to={item.path}
-                className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${
-                  isActive 
-                    ? "bg-indigo-600 text-white shadow-lg shadow-indigo-200" 
-                    : "text-gray-500 hover:bg-gray-100 hover:text-gray-900"
-                }`}
+                className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${isActive
+                  ? "bg-indigo-600 text-white shadow-lg shadow-indigo-200"
+                  : "text-gray-500 hover:bg-gray-100 hover:text-gray-900"
+                  }`}
               >
                 <item.icon size={20} />
                 <span className="font-medium">{item.label}</span>
@@ -50,7 +50,7 @@ export default function AdminLayout() {
         </nav>
 
         <div className="p-4 border-t border-gray-100">
-          <button 
+          <button
             onClick={handleLogout}
             className="flex items-center gap-3 px-4 py-3 w-full text-red-500 hover:bg-red-50 rounded-xl transition"
           >
@@ -65,10 +65,10 @@ export default function AdminLayout() {
         <header className="h-16 bg-white border-b border-gray-200 flex items-center justify-between px-8">
           <div className="relative w-96">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
-            <input 
-              type="text" 
-              placeholder="Search..." 
-              className="w-full pl-10 pr-4 py-2 bg-gray-50 border-none rounded-lg focus:ring-2 focus:ring-indigo-100 outline-none" 
+            <input
+              type="text"
+              placeholder="Search..."
+              className="w-full pl-10 pr-4 py-2 bg-gray-50 border-none rounded-lg focus:ring-2 focus:ring-indigo-100 outline-none"
             />
           </div>
           <div className="flex items-center gap-4">

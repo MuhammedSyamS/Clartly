@@ -9,7 +9,6 @@ export default function MyOrders() {
 
   useEffect(() => {
     if (loading) return;
-
     if (!token) {
       setError("Please login to view your orders");
       return;
@@ -17,11 +16,11 @@ export default function MyOrders() {
 
     const fetchOrders = async () => {
       try {
-        const res = await axios.get("/api/orders/my-orders", {
+        const res = await axios.get("/api/orders", {
           headers: { Authorization: `Bearer ${token}` },
         });
 
-        setOrders(Array.isArray(res.data) ? res.data : []);
+        setOrders(res.data.orders || []); // Important fix
       } catch (err) {
         console.error("Orders fetch error:", err);
         setError("Unable to load orders");
@@ -55,12 +54,12 @@ export default function MyOrders() {
               <div className="text-right">
                 <span
                   className={`px-3 py-1 rounded-full text-sm font-medium ${
-                    order.status === "Pending"
+                    order.orderStatus === "Placed"
                       ? "bg-yellow-100 text-yellow-700"
                       : "bg-green-100 text-green-700"
                   }`}
                 >
-                  {order.status}
+                  {order.orderStatus}
                 </span>
                 <p className="mt-2 font-bold text-lg">₹{order.totalAmount}</p>
               </div>
@@ -68,9 +67,9 @@ export default function MyOrders() {
 
             {/* Items */}
             <div className="p-5 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-5">
-              {order.items.map((item, i) => (
+              {order.items.map(item => (
                 <div
-                  key={i}
+                  key={item.product} // use product ID as key
                   className="flex gap-4 border rounded-lg p-4 bg-gray-50"
                 >
                   <img
@@ -80,9 +79,7 @@ export default function MyOrders() {
                   />
                   <div className="flex flex-col justify-between">
                     <p className="font-semibold">{item.name}</p>
-                    <p className="text-sm text-gray-600">
-                      Qty: {item.quantity}
-                    </p>
+                    <p className="text-sm text-gray-600">Qty: {item.quantity}</p>
                     <p className="font-medium">₹{item.price}</p>
                   </div>
                 </div>

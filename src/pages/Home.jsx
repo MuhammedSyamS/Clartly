@@ -4,22 +4,23 @@ import ProductGrid from "../components/ProductGrid";
 import CategoryBar from "../components/CategoryBar";
 import ProductDetails from "./ProductDetails";
 import { useCart } from "../context/CartContext";
+import { useWishlist } from "../context/WishlistContext";
 import { useNavigate } from "react-router-dom";
 
 export default function HomePage() {
   const [activeCategory, setActiveCategory] = useState("All");
   const [selectedProduct, setSelectedProduct] = useState(null);
-  const [wishlist, setWishlist] = useState([]); // ✅ wishlist state
   const [user, setUser] = useState(null);
   const [products, setProducts] = useState([]);
   const productRef = useRef(null);
 
   const { addToCart } = useCart();
+  const { wishlist, toggleWishlist } = useWishlist();
   const navigate = useNavigate();
 
   // ✅ Check login
   useEffect(() => {
-    const storedUser = localStorage.getItem("user");
+    const storedUser = sessionStorage.getItem("user");
     if (!storedUser) {
       navigate("/login");
     } else {
@@ -34,17 +35,6 @@ export default function HomePage() {
       .then(data => setProducts(data))
       .catch(err => console.error(err));
   }, []);
-
-  // ✅ Toggle wishlist
-  const toggleWishlist = (product) => {
-    setWishlist(prev => {
-      if (prev.some(p => p._id === product._id)) {
-        return prev.filter(p => p._id !== product._id); // remove
-      } else {
-        return [...prev, product]; // add
-      }
-    });
-  };
 
   const filteredProducts =
     activeCategory === "All"
@@ -62,9 +52,6 @@ export default function HomePage() {
 
         <ProductGrid
           products={filteredProducts}
-          wishlist={wishlist}
-          toggleWishlist={toggleWishlist}
-          addToCart={addToCart}
           onSelect={setSelectedProduct}
         />
       </div>

@@ -1,31 +1,38 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import { useAuth } from "./AuthContext";
-import { useCart } from "./CartContext";
 
 const WishlistContext = createContext();
 const API_URL = "http://localhost:5000/api";
 
 export const WishlistProvider = ({ children }) => {
   const { token } = useAuth();
-  const { addToCart } = useCart();
   const [wishlist, setWishlist] = useState([]);
+  const [loading, setLoading] = useState(false);
 
   // ----------------------------
   // FETCH WISHLIST
   // ----------------------------
   const fetchWishlist = async () => {
-    if (!token) return setWishlist([]);
+    if (!token) {
+      setWishlist([]);
+      return;
+    }
+
+    setLoading(true);
     try {
       const res = await fetch(`${API_URL}/wishlist`, {
         headers: { Authorization: `Bearer ${token}` },
       });
+
       if (!res.ok) throw new Error("Failed to fetch wishlist");
 
       const data = await res.json();
-      setWishlist(data.wishlist || []);
+      setWishlist(Array.isArray(data.wishlist) ? data.wishlist : []);
     } catch (err) {
       console.error("Fetch wishlist error:", err);
       setWishlist([]);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -37,9 +44,19 @@ export const WishlistProvider = ({ children }) => {
   // TOGGLE WISHLIST
   // ----------------------------
   const toggleWishlist = async (product) => {
-    if (!token) return alert("Login required to manage wishlist");
+    if (!token) {
+      alert("Login required to manage wishlist");
+      return;
+    }
+
+    if (!product || !product._id) {
+      console.error("Invalid product:", product);
+      return;
+    }
 
     try {
+      console.log("Toggling wishlist for product:", product._id, "with token:", token.substring(0, 20) + "...");
+      
       const res = await fetch(`${API_URL}/wishlist/toggle`, {
         method: "POST",
         headers: {
@@ -49,17 +66,18 @@ export const WishlistProvider = ({ children }) => {
         body: JSON.stringify({ productId: product._id }),
       });
 
+      console.log("Wishlist toggle response status:", res.status);
+      const data = await res.json();
+      console.log("Wishlist toggle response data:", data);
+
       if (!res.ok) {
-        const errData = await res.json();
-        throw new Error(errData.message || "Toggle wishlist failed");
+        throw new Error(data.message || "Toggle wishlist failed");
       }
 
-      const data = await res.json();
-      setWishlist(data.wishlist || []);
+      setWishlist(Array.isArray(data.wishlist) ? data.wishlist : []);
     } catch (err) {
       console.error("Toggle wishlist error:", err);
-      alert(err.message || "Wishlist action failed");
-      fetchWishlist(); // revert on error
+      alert("Failed to update wishlist. Please try again.");
     }
   };
 
@@ -68,6 +86,11 @@ export const WishlistProvider = ({ children }) => {
   // ----------------------------
   const removeFromWishlist = async (productId) => {
     if (!token) return;
+
+    if (!productId) {
+      console.error("Invalid product ID:", productId);
+      return;
+    }
 
     try {
       const res = await fetch(`${API_URL}/wishlist/${productId}`, {
@@ -78,34 +101,28 @@ export const WishlistProvider = ({ children }) => {
       if (!res.ok) throw new Error("Failed to remove wishlist item");
 
       const data = await res.json();
-      setWishlist(data.wishlist || []);
+      setWishlist(Array.isArray(data.wishlist) ? data.wishlist : []);
     } catch (err) {
       console.error("Remove wishlist error:", err);
-      fetchWishlist(); // revert on error
+      alert("Failed to remove from wishlist");
+      await fetchWishlist(); // Revert on error
     }
   };
 
-  // ----------------------------
-  // MOVE ITEM TO CART
-  // ----------------------------
-  const moveToCart = async (product) => {
-    try {
-      await addToCart(product._id); // Add to cart
-      await removeFromWishlist(product._id); // Remove from wishlist
-    } catch (err) {
-      console.error("Move to cart error:", err);
-      alert("Failed to move item to cart");
-    }
+  // Check if product is in wishlist
+  const isWishlisted = (productId) => {
+    return wishlist.some(item => item._id === productId);
   };
 
   return (
     <WishlistContext.Provider
       value={{
         wishlist,
+        loading,
         wishlistCount: wishlist.length,
         toggleWishlist,
         removeFromWishlist,
-        moveToCart,
+        isWishlisted,
       }}
     >
       {children}
@@ -113,4 +130,10 @@ export const WishlistProvider = ({ children }) => {
   );
 };
 
-export const useWishlist = () => useContext(WishlistContext);
+export const useWishlist = () => {
+  const context = useContext(WishlistContext);
+  if (!context) {
+    throw new Error("useWishlist must be used within WishlistProvider");
+  }
+  return context;
+};
