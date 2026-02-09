@@ -1,6 +1,6 @@
-import { useCart } from "../context/CartContext";
-import { useWishlist } from "../context/WishlistContext";
-import { useAuth } from "../context/AuthContext";
+import { useCart } from "../context/CartContext.jsx";
+import { useWishlist } from "../context/WishlistContext.jsx";
+import { useAuth } from "../context/AuthContext.jsx";
 import { Heart, Search, ShoppingCart, Menu, X, Package, LogOut, User } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import logo from "../assets/styles/Cartly.png";

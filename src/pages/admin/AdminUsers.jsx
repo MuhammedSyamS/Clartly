@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Trash2 } from "lucide-react";
-import { useAuth } from "../../context/AuthContext";
+import { useAuth } from "../../context/AuthContext.jsx";
 
 export default function AdminUsers() {
   const [users, setUsers] = useState([]);
@@ -13,7 +13,7 @@ export default function AdminUsers() {
 
   const fetchUsers = async () => {
     try {
-      const response = await fetch("http://localhost:5000/api/admin/users", {
+      const response = await fetch("http://localhost:5001/api/admin/users", {
         headers: { Authorization: `Bearer ${token}` }
       });
       const data = await response.json();
@@ -29,7 +29,7 @@ export default function AdminUsers() {
     if (!window.confirm("Are you sure you want to delete this user?")) return;
 
     try {
-      const response = await fetch(`http://localhost:5000/api/admin/users/${id}`, {
+      const response = await fetch(`http://localhost:5001/api/admin/users/${id}`, {
         method: "DELETE",
         headers: { Authorization: `Bearer ${token}` }
       });

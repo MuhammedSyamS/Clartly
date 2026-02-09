@@ -2,7 +2,7 @@ import { createContext, useContext, useEffect, useState } from "react";
 import { useAuth } from "./AuthContext";
 
 const WishlistContext = createContext();
-const API_URL = "http://localhost:5000/api";
+const API_URL = "http://localhost:5001/api";
 
 export const WishlistProvider = ({ children }) => {
   const { token } = useAuth();

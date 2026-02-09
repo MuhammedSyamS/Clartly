@@ -1,10 +1,10 @@
 import { useState, useRef, useEffect } from "react";
-import Hero from "../components/Hero";
-import ProductGrid from "../components/ProductGrid";
-import CategoryBar from "../components/CategoryBar";
-import ProductDetails from "./ProductDetails";
-import { useCart } from "../context/CartContext";
-import { useWishlist } from "../context/WishlistContext";
+import Hero from "../components/Hero.jsx";
+import ProductGrid from "../components/ProductGrid.jsx";
+import CategoryBar from "../components/CategoryBar.jsx";
+import ProductDetails from "./ProductDetails.jsx";
+import { useCart } from "../context/CartContext.jsx";
+import { useWishlist } from "../context/WishlistContext.jsx";
 import { useNavigate } from "react-router-dom";
 
 export default function HomePage() {
@@ -30,7 +30,7 @@ export default function HomePage() {
 
   // ✅ Fetch products
   useEffect(() => {
-    fetch("http://localhost:5000/api/products")
+    fetch("http://localhost:5001/api/products")
       .then(res => res.json())
       .then(data => setProducts(data))
       .catch(err => console.error(err));

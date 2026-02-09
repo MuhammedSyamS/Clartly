@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Plus, Trash2, Edit2, X } from "lucide-react";
-import { useAuth } from "../../context/AuthContext";
+import { useAuth } from "../../context/AuthContext.jsx";
 
 export default function AdminProducts() {
   const [products, setProducts] = useState([]);
@@ -29,7 +29,7 @@ export default function AdminProducts() {
 
   const fetchProducts = async () => {
     try {
-      const response = await fetch("http://localhost:5000/api/admin/products", {
+      const response = await fetch("http://localhost:5001/api/admin/products", {
         headers: { Authorization: `Bearer ${token}` }
       });
       const data = await response.json();
@@ -68,8 +68,8 @@ export default function AdminProducts() {
     try {
       const method = editingId ? "PUT" : "POST";
       const url = editingId
-        ? `http://localhost:5000/api/admin/products/${editingId}`
-        : "http://localhost:5000/api/admin/products";
+        ? `http://localhost:5001/api/admin/products/${editingId}`
+        : "http://localhost:5001/api/admin/products";
 
       const response = await fetch(url, {
         method,
@@ -97,7 +97,7 @@ export default function AdminProducts() {
     if (!window.confirm("Are you sure you want to delete this product?")) return;
 
     try {
-      const response = await fetch(`http://localhost:5000/api/admin/products/${id}`, {
+      const response = await fetch(`http://localhost:5001/api/admin/products/${id}`, {
         method: "DELETE",
         headers: { Authorization: `Bearer ${token}` }
       });

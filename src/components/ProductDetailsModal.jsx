@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useCart } from "../context/CartContext";
+import { useCart } from "../context/CartContext.jsx";
 import { useNavigate } from "react-router-dom";
 import { X, ShoppingCart } from "lucide-react";
 

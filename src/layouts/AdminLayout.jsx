@@ -2,7 +2,7 @@ import { Outlet, Link, useLocation, useNavigate } from "react-router-dom";
 import { LayoutDashboard, Package, ShoppingBag, Users, LogOut, Search, Bell } from "lucide-react";
 
 // ✅ FIXED IMPORT PATH (One dot instead of two)
-import { useAuth } from "../context/AuthContext";
+import { useAuth } from "../context/AuthContext.jsx";
 
 export default function AdminLayout() {
   const location = useLocation();

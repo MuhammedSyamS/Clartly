@@ -1,6 +1,6 @@
 import { Link, useNavigate } from "react-router-dom";
 import { Trash2, ShoppingCart } from "lucide-react";
-import { useCart } from "../context/CartContext";
+import { useCart } from "../context/CartContext.jsx";
 
 export default function CartPage() {
   const { cart, removeFromCart, clearCart } = useCart();

@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Heart } from "lucide-react";
-import { useCart } from "../context/CartContext";
-import { useWishlist } from "../context/WishlistContext";
+import { useCart } from "../context/CartContext.jsx";
+import { useWishlist } from "../context/WishlistContext.jsx";
 import { useNavigate } from "react-router-dom";
 
 export default function ProductDetails({ product, onClose }) {

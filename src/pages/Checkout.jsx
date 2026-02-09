@@ -1,5 +1,5 @@
-import { useCart } from "../context/CartContext";
-import { useAuth } from "../context/AuthContext";
+import { useCart } from "../context/CartContext.jsx";
+import { useAuth } from "../context/AuthContext.jsx";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 

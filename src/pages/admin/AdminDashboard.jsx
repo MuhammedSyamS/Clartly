@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { DollarSign, ShoppingBag, Users, Package } from "lucide-react";
-import { useAuth } from "../../context/AuthContext";
+import { useAuth } from "../../context/AuthContext.jsx";
 
 export default function AdminDashboard() {
   const [stats, setStats] = useState(null);
@@ -11,7 +11,7 @@ export default function AdminDashboard() {
   useEffect(() => {
     const fetchStats = async () => {
       try {
-        const response = await fetch("http://localhost:5000/api/admin/stats", {
+        const response = await fetch("http://localhost:5001/api/admin/stats", {
           headers: { Authorization: `Bearer ${token}` }
         });
         const data = await response.json();
@@ -30,7 +30,7 @@ export default function AdminDashboard() {
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const response = await fetch("http://localhost:5000/api/admin/products", {
+        const response = await fetch("http://localhost:5001/api/admin/products", {
           headers: { Authorization: `Bearer ${token}` }
         });
         const data = await response.json();

@@ -1,6 +1,6 @@
 import { useLocation, useNavigate } from "react-router-dom";
-import { useCart } from "../context/CartContext";
-import api from "../utils/axios";
+import { useCart } from "../context/CartContext.jsx";
+import api from "../utils/axios.js";
 import { useState } from "react";
 
 export default function Payment() {

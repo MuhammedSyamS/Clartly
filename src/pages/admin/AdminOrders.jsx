@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Eye, X } from "lucide-react";
-import { useAuth } from "../../context/AuthContext";
+import { useAuth } from "../../context/AuthContext.jsx";
 
 export default function AdminOrders() {
   const [orders, setOrders] = useState([]);
@@ -16,7 +16,7 @@ export default function AdminOrders() {
 
   const fetchOrders = async () => {
     try {
-      const response = await fetch("http://localhost:5000/api/admin/orders", {
+      const response = await fetch("http://localhost:5001/api/admin/orders", {
         headers: { Authorization: `Bearer ${token}` }
       });
       const data = await response.json();
@@ -35,7 +35,7 @@ export default function AdminOrders() {
 
   const handleViewOrder = async (order) => {
     try {
-      const response = await fetch(`http://localhost:5000/api/admin/orders/${order._id}`, {
+      const response = await fetch(`http://localhost:5001/api/admin/orders/${order._id}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       const data = await response.json();
@@ -50,7 +50,7 @@ export default function AdminOrders() {
   const handleUpdateStatus = async () => {
     try {
       const response = await fetch(
-        `http://localhost:5000/api/admin/orders/${selectedOrder._id}/status`,
+        `http://localhost:5001/api/admin/orders/${selectedOrder._id}/status`,
         {
           method: "PUT",
           headers: {

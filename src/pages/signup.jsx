@@ -21,7 +21,7 @@ export default function Signup() {
     setLoading(true);
 
     try {
-      const res = await fetch("http://localhost:5000/request-otp", {
+      const res = await fetch("http://localhost:6000/request-otp", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ name, email, password }),
@@ -53,7 +53,7 @@ export default function Signup() {
     setLoading(true);
 
     try {
-      const res = await fetch("http://localhost:5000/verify-otp", {
+      const res = await fetch("http://localhost:5001/verify-otp", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, otp }),

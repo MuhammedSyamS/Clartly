@@ -1,10 +1,10 @@
 import { useState } from "react"; 
 import { Heart, Trash2, ShoppingCart, Eye } from "lucide-react";
-import { useWishlist } from "../context/WishlistContext";
-import { useCart } from "../context/CartContext"; 
+import { useWishlist } from "../context/WishlistContext.jsx";
+import { useCart } from "../context/CartContext.jsx"; 
 
 // ✅ IMPORT THE NEW POPUP
-import ProductDetailsModal from "../components/ProductDetailsModal";
+import ProductDetailsModal from "../components/ProductDetailsModal.jsx";
 
 export default function WishlistPage() {
   const { wishlist, removeFromWishlist } = useWishlist();
